@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="InviteStudio.Application/InviteStudio.Application.csproj" />
+  <Project Path="InviteStudio.Web/InviteStudio.Web.csproj">
+    <BuildDependency Project="InviteStudio.Application/InviteStudio.Application.csproj" />
+  </Project>
+</Solution>
