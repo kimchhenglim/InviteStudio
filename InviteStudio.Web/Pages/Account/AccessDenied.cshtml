@@ -1,0 +1,27 @@
+@page
+@model InviteStudio.Web.Pages.Account.AccessDeniedModel
+@{
+    ViewData["Title"] = "Access denied";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - InviteStudio</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="login-page">
+    <div class="login-shell">
+        <div class="login-card text-center">
+            <div class="login-brand">InviteStudio</div>
+            <h1>Access denied</h1>
+            <p class="login-subtitle">You don't have permission to view this page.</p>
+            <a class="btn btn-primary w-100" asp-page="/Account/Login">Back to login</a>
+        </div>
+    </div>
+</body>
+</html>

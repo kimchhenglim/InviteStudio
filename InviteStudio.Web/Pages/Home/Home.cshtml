@@ -1,0 +1,93 @@
+@page
+@model InviteStudio.Web.Pages.Home.IndexModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="home-hero">
+    <div class="container">
+        <div class="home-hero-content">
+            <div>
+                <h1>Your events</h1>
+                <p class="home-subtitle">Pick an event to continue or start a new one.</p>
+            </div>
+            <div>
+                <a class="btn btn-primary" asp-page="/Events/Create">Create event</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row g-4">
+        <div class="col-12 col-md-6 col-xl-4">
+            <article class="event-card">
+                <div class="event-card-header">
+                    <div>
+                        <h2>Spring Wedding</h2>
+                        <p class="event-date">April 22, 2025 · Phnom Penh</p>
+                    </div>
+                    <span class="event-status">In progress</span>
+                </div>
+                <p class="event-description">Elegant garden ceremony with 180 guests invited.</p>
+                <div class="event-meta">
+                    <div>
+                        <span class="event-meta-label">Guests</span>
+                        <span class="event-meta-value">134 confirmed</span>
+                    </div>
+                    <div>
+                        <span class="event-meta-label">Invites sent</span>
+                        <span class="event-meta-value">92%</span>
+                    </div>
+                </div>
+                <button class="btn btn-outline-primary w-100" type="button">Open event</button>
+            </article>
+        </div>
+        <div class="col-12 col-md-6 col-xl-4">
+            <article class="event-card">
+                <div class="event-card-header">
+                    <div>
+                        <h2>Product Launch</h2>
+                        <p class="event-date">May 9, 2025 · Factory Phnom Penh</p>
+                    </div>
+                    <span class="event-status is-ready">Ready to send</span>
+                </div>
+                <p class="event-description">VIP press preview with custom RSVP flows.</p>
+                <div class="event-meta">
+                    <div>
+                        <span class="event-meta-label">Guests</span>
+                        <span class="event-meta-value">76 confirmed</span>
+                    </div>
+                    <div>
+                        <span class="event-meta-label">Invites sent</span>
+                        <span class="event-meta-value">100%</span>
+                    </div>
+                </div>
+                <button class="btn btn-outline-primary w-100" type="button">Open event</button>
+            </article>
+        </div>
+        <div class="col-12 col-md-6 col-xl-4">
+            <article class="event-card">
+                <div class="event-card-header">
+                    <div>
+                        <h2>Team Retreat</h2>
+                        <p class="event-date">June 18, 2025 · Kep Province</p>
+                    </div>
+                    <span class="event-status is-draft">Draft</span>
+                </div>
+                <p class="event-description">Two-day offsite with travel and accommodation updates.</p>
+                <div class="event-meta">
+                    <div>
+                        <span class="event-meta-label">Guests</span>
+                        <span class="event-meta-value">42 invited</span>
+                    </div>
+                    <div>
+                        <span class="event-meta-label">Invites sent</span>
+                        <span class="event-meta-value">40%</span>
+                    </div>
+                </div>
+                <button class="btn btn-outline-primary w-100" type="button">Open event</button>
+            </article>
+        </div>
+    </div>
+</div>
