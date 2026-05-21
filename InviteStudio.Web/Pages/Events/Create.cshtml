@@ -9,27 +9,111 @@
         <div class="col-12 col-lg-8">
             <div class="event-create-card">
                 <h1 class="h3 mb-3">Create a new event</h1>
-                <p class="text-muted mb-4">Start with a name and basic details. You can finish setup later.</p>
+                <p class="text-muted mb-4">Start with some details. You can finish setup later.</p>
 
-                <div class="d-flex flex-column gap-3">
+                <form method="post" class="d-flex flex-column gap-3">
                     <div>
-                        <label class="form-label">Event name</label>
-                        <input class="form-control" placeholder="e.g. Spring Wedding" />
+                        <label class="form-label" asp-for="Input.EventType"></label>
+                        <select class="form-select" asp-for="Input.EventType" asp-items="Model.EventTypeOptions">
+                            <option value="">Select event type</option>
+                        </select>
+                        <span class="text-danger" asp-validation-for="Input.EventType"></span>
+                    </div>
+                    <div id="personFields" class="d-flex flex-column gap-3">
+                        <div id="personFields1">
+                            <label id="person1Label" class="form-label" asp-for="Input.Person1Name"></label>
+                            <input class="form-control" asp-for="Input.Person1Name" />
+                            <span class="text-danger" asp-validation-for="Input.Person1Name"></span>
+                        </div>
+                        <div id="personFields2">
+                            <label id="person2Label" class="form-label" asp-for="Input.Person2Name"></label>
+                            <input class="form-control" asp-for="Input.Person2Name" />
+                            <span class="text-danger" asp-validation-for="Input.Person2Name"></span>
+                        </div>
                     </div>
                     <div>
-                        <label class="form-label">Event date</label>
-                        <input class="form-control" type="date" />
+                        <label class="form-label" asp-for="Input.EventDate"></label>
+                        <input class="form-control" asp-for="Input.EventDate" type="date" />
+                        <span class="text-danger" asp-validation-for="Input.EventDate"></span>
                     </div>
                     <div>
-                        <label class="form-label">Location</label>
-                        <input class="form-control" placeholder="City or venue" />
+                        <label class="form-label" asp-for="Input.Venue"></label>
+                        <input class="form-control" asp-for="Input.Venue" />
+                        <span class="text-danger" asp-validation-for="Input.Venue"></span>
+                    </div>
+                    <div>
+                        <label class="form-label" asp-for="Input.VenueMapLink"></label>
+                        <input class="form-control" asp-for="Input.VenueMapLink" type="url" />
+                        <span class="text-danger" asp-validation-for="Input.VenueMapLink"></span>
                     </div>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-primary" type="button">Continue</button>
-                        <a class="btn btn-outline-primary" asp-page="/Home/Index">Cancel</a>
+                        <button class="btn btn-primary" type="submit">Continue</button>
+                        <a class="btn btn-outline-secondary" asp-page="/Home/Home">Back</a>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        (() => {
+            const eventTypeSelect = document.getElementById("Input_EventType");
+            const personFields = document.getElementById("personFields");
+            const personFields1 = document.getElementById("personFields1");
+            const personFields2 = document.getElementById("personFields2");
+            const person1Label = document.getElementById("person1Label");
+            const person2Label = document.getElementById("person2Label");
+            const person1Input = document.getElementById("Input_Person1Name");
+            const person2Input = document.getElementById("Input_Person2Name");
+
+            if (!eventTypeSelect || !personFields || !person1Label || !person2Label) {
+                return;
+            }
+
+            const defaultPerson1Label = person1Label.textContent?.trim() ?? "Person 1 name";
+            const defaultPerson2Label = person2Label.textContent?.trim() ?? "Person 2 name";
+
+            const eventTypeConfig = {
+                Wedding: { person1Label: "Bride name", person2Label: "Groom name" },
+                Engagement: { person1Label: "Fiancée name", person2Label: "Fiancé name" },
+                Anniversary: { person1Label: "Husband name", person2Label: "Wife name" },
+                BabyShower: { person1Label: "Baby Name", person2Label: "N/A" },
+                Birthday: { person1Label: "Name", person2Label: "N/A" },
+                Party: { person1Label: "Title", person2Label: "N/A" }
+            };
+
+            const updatePersonFields = () => {
+                const selectedType = eventTypeSelect.value;
+                const config = eventTypeConfig[selectedType];
+
+                if (!config) {
+                    personFields.hidden = true;
+                    personFields1.hidden = true;
+                    personFields2.hidden = true;
+                    person1Label.textContent = defaultPerson1Label;
+                    person2Label.textContent = defaultPerson2Label;
+                    if (person1Input) person1Input.value = "";
+                    if (person2Input) person2Input.value = "";
+                    return;
+                }
+
+                personFields.hidden = false;
+                personFields1.hidden = false;
+                personFields2.hidden = false;
+                person1Label.textContent = config.person1Label;
+                person2Label.textContent = config.person2Label;
+
+                if(config.person2Label === "N/A"){
+                    personFields2.hidden = true;
+                    person2Label.textContent = defaultPerson2Label;
+                    if (person2Input) person2Input.value = "";
+                }
+            };
+
+            eventTypeSelect.addEventListener("change", updatePersonFields);
+            updatePersonFields();
+        })();
+    </script>
+}

@@ -1,0 +1,94 @@
+@page "{id:guid}"
+@model InviteStudio.Web.Pages.Events.DetailsModel
+@{
+    ViewData["Title"] = Model.EventTitle;
+}
+
+<div class="event-detail-hero">
+    <div class="container">
+        <nav class="event-detail-menu">
+            <a class="event-detail-menu-link is-active" href="#">General</a>
+            <a class="event-detail-menu-link" asp-page="/Events/DesignCard" asp-route-id="@Model.Event?.Id">Design card</a>
+            <a class="event-detail-menu-link" href="#">Guests</a>
+        </nav>
+        <div class="event-detail-header">
+            <div>
+                <span class="event-detail-eyebrow">Event details</span>
+                <h1>@Model.EventTitle</h1>
+                <p class="event-detail-subtitle">@Model.EventSubtitle</p>
+            </div>
+            <div class="event-detail-actions">
+                <button class="btn btn-primary" type="button">Send invites</button>
+                <button class="btn btn-outline-primary" type="button">Edit details</button>
+                <a class="btn btn-outline-primary" asp-page="/Home/Home">Back to home</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row g-4">
+        <div class="col-12 col-lg-8">
+            <section class="event-detail-card">
+                <div class="event-detail-section">
+                    <div>
+                        <span class="event-detail-label">Event type</span>
+                        <h2>@Model.FormattedEventType</h2>
+                    </div>
+                    <span class="event-detail-chip">In progress</span>
+                </div>
+                <div class="event-detail-grid">
+                    <div>
+                        <span class="event-detail-label">@Model.Person1Label</span>
+                        <p class="event-detail-value">@Model.Event?.Person1Name</p>
+                    </div>
+                    @if (Model.ShowPerson2)
+                    {
+                        <div>
+                            <span class="event-detail-label">@Model.Person2Label</span>
+                            <p class="event-detail-value">@Model.Event?.Person2Name</p>
+                        </div>
+                    }
+                    <div>
+                        <span class="event-detail-label">Event date</span>
+                        <p class="event-detail-value">@Model.Event?.EventDate.ToString("dddd, MMMM dd, yyyy")</p>
+                    </div>
+                    <div>
+                        <span class="event-detail-label">Venue</span>
+                        <p class="event-detail-value">@Model.Event?.Venue</p>
+                    </div>
+                </div>
+                <div class="event-detail-map">
+                    <span class="event-detail-label">Venue map</span>
+                    <div class="event-detail-map-card">
+                        <div>
+                            <p class="event-detail-value">@Model.Event?.Venue</p>
+                            <p class="event-detail-subtext">@Model.Event?.VenueMapLink</p>
+                        </div>
+                        @if (Model.HasMapLink)
+                        {
+                            <a class="btn btn-outline-primary btn-sm" href="@Model.Event?.VenueMapLink" target="_blank" rel="noopener">Open map</a>
+                        }
+                    </div>
+                </div>
+                <div class="event-detail-divider"></div>
+                <div class="event-detail-footer">
+                    <div>
+                        <span class="event-detail-label">Guests invited</span>
+                        <p class="event-detail-value">134</p>
+                    </div>
+                    <div>
+                        <span class="event-detail-label">RSVP responses</span>
+                        <p class="event-detail-value">92%</p>
+                    </div>
+                    <div>
+                        <span class="event-detail-label">Status</span>
+                        <p class="event-detail-value">Designing invites</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class="col-12 col-lg-4">
+        </div>
+    </div>
+</div>

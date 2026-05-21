@@ -14,7 +14,6 @@ namespace InviteStudio.Web.Pages.Account
         public LoginModel(AuthService authService)
         {
             _authService = authService;
-            this.Input.Email = "lim0864flindersuni@gmail.com";
         }
         [BindProperty]
         public LoginInput Input { get; set; } = new();

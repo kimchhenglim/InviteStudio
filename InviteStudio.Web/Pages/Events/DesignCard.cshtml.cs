@@ -1,35 +1,43 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using InviteStudio.Application.Entities;
 using InviteStudio.Application.Enums;
 using InviteStudio.Application.Persistence;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
-namespace InviteStudio.Web.Pages.Home
+namespace InviteStudio.Web.Pages.Events
 {
-    public class IndexModel : PageModel
+    public class DesignCardModel : PageModel
     {
         private readonly InviteStudioDbContext _dbContext;
 
-        public IndexModel(InviteStudioDbContext dbContext)
+        public DesignCardModel(InviteStudioDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        public IReadOnlyList<Event> Events { get; private set; } = Array.Empty<Event>();
+        public Event? Event { get; private set; }
 
-        public async Task OnGetAsync()
+        public string EventTitle => Event == null ? "Event details" : BuildEventTitle(Event);
+
+        public string EventSubtitle => Event == null ? string.Empty : $"{FormatEventType(Event.EventType)} · {Event.EventDate:MMMM dd, yyyy}";
+
+        public async Task<IActionResult> OnGetAsync(Guid id)
         {
-            Events = await _dbContext.Events
-                .AsNoTracking()
-                .OrderByDescending(item => item.EventDate)
-                .ToListAsync();
+            Event = await _dbContext.Events.AsNoTracking().FirstOrDefaultAsync(item => item.Id == id);
+
+            if (Event == null)
+            {
+                return Page();
+            }
+
+            return Page();
         }
 
-        public string GetEventTitle(Event @event)
+        private static string BuildEventTitle(Event @event)
         {
             if (!string.IsNullOrWhiteSpace(@event.Person1Name) && !string.IsNullOrWhiteSpace(@event.Person2Name))
             {
@@ -44,7 +52,7 @@ namespace InviteStudio.Web.Pages.Home
             return FormatEventType(@event.EventType);
         }
 
-        public string FormatEventType(EventType eventType)
+        private static string FormatEventType(EventType eventType)
         {
             var value = eventType.ToString();
             if (string.IsNullOrWhiteSpace(value))

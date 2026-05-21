@@ -20,74 +20,40 @@
 
 <div class="container pb-5">
     <div class="row g-4">
-        <div class="col-12 col-md-6 col-xl-4">
-            <article class="event-card">
-                <div class="event-card-header">
-                    <div>
-                        <h2>Spring Wedding</h2>
-                        <p class="event-date">April 22, 2025 · Phnom Penh</p>
-                    </div>
-                    <span class="event-status">In progress</span>
+        @if (Model.Events.Count == 0)
+        {
+            <div class="col-12">
+                <div class="alert alert-light">No events yet. Create your first event to get started.</div>
+            </div>
+        }
+        else
+        {
+            foreach (var eventItem in Model.Events)
+            {
+                <div class="col-12 col-md-6 col-xl-4">
+                    <article class="event-card">
+                        <div class="event-card-header">
+                            <div>
+                                <h2>@Model.GetEventTitle(eventItem)</h2>
+                                <p class="event-date">@Model.FormatEventType(eventItem.EventType) &middot; @eventItem.EventDate.ToString("MMMM dd, yyyy")</p>
+                            </div>
+                            <span class="event-status">In progress</span>
+                        </div>
+                        <p class="event-description">@eventItem.Venue</p>
+                        <div class="event-meta">
+                            <div>
+                                <span class="event-meta-label">Guests</span>
+                                <span class="event-meta-value">--</span>
+                            </div>
+                            <div>
+                                <span class="event-meta-label">Invites sent</span>
+                                <span class="event-meta-value">--</span>
+                            </div>
+                        </div>
+                        <a class="btn btn-outline-primary w-100" asp-page="/Events/Details" asp-route-id="@eventItem.Id">Open event</a>
+                    </article>
                 </div>
-                <p class="event-description">Elegant garden ceremony with 180 guests invited.</p>
-                <div class="event-meta">
-                    <div>
-                        <span class="event-meta-label">Guests</span>
-                        <span class="event-meta-value">134 confirmed</span>
-                    </div>
-                    <div>
-                        <span class="event-meta-label">Invites sent</span>
-                        <span class="event-meta-value">92%</span>
-                    </div>
-                </div>
-                <button class="btn btn-outline-primary w-100" type="button">Open event</button>
-            </article>
-        </div>
-        <div class="col-12 col-md-6 col-xl-4">
-            <article class="event-card">
-                <div class="event-card-header">
-                    <div>
-                        <h2>Product Launch</h2>
-                        <p class="event-date">May 9, 2025 · Factory Phnom Penh</p>
-                    </div>
-                    <span class="event-status is-ready">Ready to send</span>
-                </div>
-                <p class="event-description">VIP press preview with custom RSVP flows.</p>
-                <div class="event-meta">
-                    <div>
-                        <span class="event-meta-label">Guests</span>
-                        <span class="event-meta-value">76 confirmed</span>
-                    </div>
-                    <div>
-                        <span class="event-meta-label">Invites sent</span>
-                        <span class="event-meta-value">100%</span>
-                    </div>
-                </div>
-                <button class="btn btn-outline-primary w-100" type="button">Open event</button>
-            </article>
-        </div>
-        <div class="col-12 col-md-6 col-xl-4">
-            <article class="event-card">
-                <div class="event-card-header">
-                    <div>
-                        <h2>Team Retreat</h2>
-                        <p class="event-date">June 18, 2025 · Kep Province</p>
-                    </div>
-                    <span class="event-status is-draft">Draft</span>
-                </div>
-                <p class="event-description">Two-day offsite with travel and accommodation updates.</p>
-                <div class="event-meta">
-                    <div>
-                        <span class="event-meta-label">Guests</span>
-                        <span class="event-meta-value">42 invited</span>
-                    </div>
-                    <div>
-                        <span class="event-meta-label">Invites sent</span>
-                        <span class="event-meta-value">40%</span>
-                    </div>
-                </div>
-                <button class="btn btn-outline-primary w-100" type="button">Open event</button>
-            </article>
-        </div>
+            }
+        }
     </div>
 </div>
