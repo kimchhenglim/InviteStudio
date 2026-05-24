@@ -46,6 +46,11 @@
                         <input class="form-control" asp-for="Input.VenueMapLink" type="url" />
                         <span class="text-danger" asp-validation-for="Input.VenueMapLink"></span>
                     </div>
+                    <div>
+                        <label class="form-label">Pick location</label>
+                        <div class="event-map" id="eventMap"></div>
+                        <span class="form-text text-muted">Click the map to drop a pin. Drag to adjust the location.</span>
+                    </div>
                     <div class="d-flex gap-2">
                         <button class="btn btn-primary" type="submit">Continue</button>
                         <a class="btn btn-outline-secondary" asp-page="/Home/Home">Back</a>
@@ -57,6 +62,8 @@
 </div>
 
 @section Scripts {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
         (() => {
             const eventTypeSelect = document.getElementById("Input_EventType");
@@ -67,6 +74,8 @@
             const person2Label = document.getElementById("person2Label");
             const person1Input = document.getElementById("Input_Person1Name");
             const person2Input = document.getElementById("Input_Person2Name");
+            const mapElement = document.getElementById("eventMap");
+            const venueMapInput = document.getElementById("Input_VenueMapLink");
 
             if (!eventTypeSelect || !personFields || !person1Label || !person2Label) {
                 return;
@@ -114,6 +123,39 @@
 
             eventTypeSelect.addEventListener("change", updatePersonFields);
             updatePersonFields();
+
+            if (!mapElement || !venueMapInput || !window.L) {
+                return;
+            }
+
+        const map = L.map(mapElement).setView([-34.9285, 138.6007], 4);
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution: "&copy; OpenStreetMap contributors"
+            }).addTo(map);
+
+            let marker;
+
+            const updateMapLink = (lat, lng) => {
+                venueMapInput.value = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+            };
+
+            const placeMarker = (latlng) => {
+                if (!marker) {
+                    marker = L.marker(latlng, { draggable: true }).addTo(map);
+                    marker.on("dragend", () => {
+                        const position = marker.getLatLng();
+                        updateMapLink(position.lat, position.lng);
+                    });
+                } else {
+                    marker.setLatLng(latlng);
+                }
+
+                updateMapLink(latlng.lat, latlng.lng);
+            };
+
+            map.on("click", (event) => {
+                placeMarker(event.latlng);
+            });
         })();
     </script>
 }

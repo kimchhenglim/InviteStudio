@@ -410,6 +410,15 @@ a:hover {
   box-shadow: 0 18px 45px rgba(15, 40, 76, 0.12);
 }
 
+.event-map {
+  width: 100%;
+  height: 280px;
+  border-radius: 18px;
+  border: 1px solid rgba(31, 140, 255, 0.16);
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(15, 40, 76, 0.08);
+}
+
 .event-detail-hero {
   background: linear-gradient(135deg, var(--studio-blue-50), #f5f9ff 45%, #eef4fb 100%);
   padding: 3.25rem 0 2.5rem;
@@ -631,6 +640,7 @@ a:hover {
   flex-direction: column;
   gap: 1.5rem;
   text-align: center;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .event-preview-header {
@@ -684,6 +694,96 @@ a:hover {
   gap: 0.35rem;
   font-size: 0.85rem;
   color: var(--studio-muted);
+}
+
+.event-preview-divider {
+  border-top: 1px solid rgba(31, 140, 255, 0.2);
+}
+
+.event-preview-classic-header {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.event-preview-classic-header h3 {
+  text-transform: none;
+  letter-spacing: 0.05em;
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.event-palette {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.event-palette-swatch {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, var(--swatch-accent), var(--swatch-bg));
+  box-shadow: 0 10px 20px rgba(15, 40, 76, 0.12);
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.event-palette-swatch.is-active {
+  border-color: var(--studio-blue-600);
+  transform: scale(1.05);
+}
+
+.event-schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.event-schedule-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  background: var(--studio-blue-50);
+  border-radius: 16px;
+  padding: 1rem;
+  border: 1px solid rgba(31, 140, 255, 0.12);
+}
+
+.event-schedule-actions {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+#locationOpenLink.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.invite-template {
+  min-height: 420px;
+}
+
+.invite-template-wedding .event-preview-eyebrow {
+  color: #a785ff;
+}
+
+.invitation-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  background: linear-gradient(135deg, #f6f2ff, #f3f8ff 55%, #eef4fb);
+}
+
+.invitation-shell {
+  width: min(760px, 92vw);
 }
 
 @media (min-width: 992px) {

@@ -2,20 +2,22 @@
 @model InviteStudio.Web.Pages.Events.DesignCardModel
 @{
     ViewData["Title"] = "Design card";
+    var previewModel = Model.TemplateModel;
+    var selectedTemplate = Model.TemplatePartialName;
 }
 
 <div class="event-detail-hero">
     <div class="container">
         <nav class="event-detail-menu">
             <a class="event-detail-menu-link" asp-page="/Events/Details" asp-route-id="@Model.Event?.Id">General</a>
-            <a class="event-detail-menu-link is-active" href="#">Design card</a>
+            <a class="event-detail-menu-link is-active" href="#">Invitation design</a>
             <a class="event-detail-menu-link" href="#">Guests</a>
         </nav>
         <div class="event-detail-header">
             <div>
                 <span class="event-detail-eyebrow">Design card</span>
-                <h1>@Model.EventTitle</h1>
-                <p class="event-detail-subtitle">@Model.EventSubtitle</p>
+                <h1>@previewModel.Title</h1>
+                <p class="event-detail-subtitle">@previewModel.Subtitle</p>
             </div>
             <div class="event-detail-actions">
                 <button class="btn btn-primary" type="button">Save changes</button>
@@ -35,29 +37,60 @@
                         <h2>Card content</h2>
                     </div>
                 </div>
-                <div class="event-design-grid">
-                    <div>
-                        <label class="form-label" for="cardTitle">Invitation title</label>
-                        <input class="form-control" id="cardTitle" value="@Model.EventTitle" />
+                <div class="event-design-grid" id="cardContent" data-event-type="@Model.Event?.EventType" data-event-type-label="@previewModel.EventTypeLabel">
+                    <div id="personField1">
+                        <label class="form-label" id="person1Label" for="cardPerson1">Person 1 name</label>
+                        <input class="form-control" id="cardPerson1" value="@previewModel.Person1Name" />
                     </div>
-                    <div>
-                        <label class="form-label" for="cardSubtitle">Subtitle</label>
-                        <input class="form-control" id="cardSubtitle" value="@Model.EventSubtitle" />
+                    <div id="personField2">
+                        <label class="form-label" id="person2Label" for="cardPerson2">Person 2 name</label>
+                        <input class="form-control" id="cardPerson2" value="@previewModel.Person2Name" />
                     </div>
                     <div>
                         <label class="form-label" for="cardMessage">Message</label>
-                        <textarea class="form-control" id="cardMessage" rows="4">We would love to celebrate with you. Please join us for our special day.</textarea>
+                        <textarea class="form-control" id="cardMessage" rows="4">@previewModel.Message</textarea>
                     </div>
                     <div class="event-design-row">
                         <div>
                             <label class="form-label" for="cardDate">Event date</label>
-                            <input class="form-control" id="cardDate" value="@Model.Event?.EventDate.ToString("MMMM dd, yyyy")" />
+                            <input class="form-control" id="cardDate" value="@previewModel.DateText" />
                         </div>
                         <div>
                             <label class="form-label" for="cardVenue">Venue</label>
-                            <input class="form-control" id="cardVenue" value="@Model.Event?.Venue" />
+                            <input class="form-control" id="cardVenue" value="@previewModel.Venue" />
                         </div>
                     </div>
+                </div>
+            </section>
+            <section class="event-detail-card">
+                <div class="event-detail-section">
+                    <div>
+                        <span class="event-detail-label">Event schedule</span>
+                        <h2>Timeline</h2>
+                    </div>
+                </div>
+                <div class="event-design-grid">
+                    <div id="scheduleList" class="event-schedule-list"></div>
+                    <button class="btn btn-outline-primary" id="addScheduleItem" type="button">Add schedule item</button>
+                </div>
+            </section>
+            <section class="event-detail-card">
+                <div class="event-detail-section">
+                    <div>
+                        <span class="event-detail-label">Location</span>
+                        <h2>Venue map</h2>
+                    </div>
+                </div>
+                <div class="event-design-grid">
+                    <div>
+                        <label class="form-label" for="locationAddress">Address</label>
+                        <input class="form-control" id="locationAddress" value="@previewModel.Venue" placeholder="Enter venue address" />
+                    </div>
+                    <div>
+                        <label class="form-label" for="locationLink">Google Maps link</label>
+                        <input class="form-control" id="locationLink" readonly />
+                    </div>
+                    <a class="btn btn-outline-primary btn-sm" id="locationOpenLink" href="#" target="_blank" rel="noopener">Open map</a>
                 </div>
             </section>
             <section class="event-detail-card">
@@ -69,8 +102,26 @@
                 </div>
                 <div class="event-design-grid">
                     <div>
+                        <label class="form-label" for="templateSelect">Template</label>
+                        <select class="form-select" id="templateSelect">
+                            @foreach (var option in Model.TemplateOptions)
+                            {
+                                <option value="@option.Value" selected="@(option.Value == selectedTemplate)">@option.Label</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label" for="paletteSwatches">Color palette</label>
+                        <div class="event-palette" id="paletteSwatches">
+                            <button class="event-palette-swatch is-active" type="button" data-accent="#1f8cff" data-background="#ffffff" style="--swatch-accent: #1f8cff; --swatch-bg: #ffffff;"></button>
+                            <button class="event-palette-swatch" type="button" data-accent="#8b5cf6" data-background="#f8f2ff" style="--swatch-accent: #8b5cf6; --swatch-bg: #f8f2ff;"></button>
+                            <button class="event-palette-swatch" type="button" data-accent="#f97316" data-background="#fff7e8" style="--swatch-accent: #f97316; --swatch-bg: #fff7e8;"></button>
+                            <button class="event-palette-swatch" type="button" data-accent="#0f766e" data-background="#ecfeff" style="--swatch-accent: #0f766e; --swatch-bg: #ecfeff;"></button>
+                        </div>
+                    </div>
+                    <div>
                         <label class="form-label" for="accentColor">Accent color</label>
-                        <input class="form-control form-control-color" id="accentColor" type="color" value="#1f8cff" />
+                        <input class="form-control form-control-color" id="accentColor" type="color" value="@previewModel.AccentColor" />
                     </div>
                     <div>
                         <label class="form-label" for="backgroundTone">Background tone</label>
@@ -108,29 +159,8 @@
                     </div>
                     <span class="event-detail-chip">Preview</span>
                 </div>
-                <div class="event-preview-shell" id="invitePreview">
-                    <div class="event-preview-header" id="previewHeader">
-                        <span class="event-preview-eyebrow">You're invited</span>
-                        <h3 id="previewTitle">@Model.EventTitle</h3>
-                        <p id="previewSubtitle">@Model.EventSubtitle</p>
-                    </div>
-                    <p class="event-preview-message" id="previewMessage">
-                        We would love to celebrate with you. Please join us for our special day.
-                    </p>
-                    <div class="event-preview-meta" id="previewMeta">
-                        <div>
-                            <span class="event-preview-label">Date</span>
-                            <span id="previewDate">@Model.Event?.EventDate.ToString("MMMM dd, yyyy")</span>
-                        </div>
-                        <div>
-                            <span class="event-preview-label">Location</span>
-                            <span id="previewVenue">@Model.Event?.Venue</span>
-                        </div>
-                    </div>
-                    <div class="event-preview-footer">
-                        <span>RSVP by April 10</span>
-                        <span id="previewAccent">invites.invite.studio</span>
-                    </div>
+                <div id="previewContainer">
+                    <partial name="~/Pages/Events/Templates/@(Model.TemplatePartialName).cshtml" model="previewModel" />
                 </div>
             </section>
         </div>
@@ -140,32 +170,76 @@
 @section Scripts {
     <script>
         (() => {
-            const titleInput = document.getElementById("cardTitle");
-            const subtitleInput = document.getElementById("cardSubtitle");
+            const contentContainer = document.getElementById("cardContent");
+            const personField1 = document.getElementById("personField1");
+            const personField2 = document.getElementById("personField2");
+            const person1Label = document.getElementById("person1Label");
+            const person2Label = document.getElementById("person2Label");
+            const person1Input = document.getElementById("cardPerson1");
+            const person2Input = document.getElementById("cardPerson2");
             const messageInput = document.getElementById("cardMessage");
             const dateInput = document.getElementById("cardDate");
             const venueInput = document.getElementById("cardVenue");
+            const templateInput = document.getElementById("templateSelect");
+            const paletteSwatches = document.getElementById("paletteSwatches");
             const accentInput = document.getElementById("accentColor");
             const backgroundInput = document.getElementById("backgroundTone");
             const fontInput = document.getElementById("fontStyle");
             const layoutInput = document.getElementById("layoutStyle");
-            const preview = document.getElementById("invitePreview");
-            const previewHeader = document.getElementById("previewHeader");
-            const previewTitle = document.getElementById("previewTitle");
-            const previewSubtitle = document.getElementById("previewSubtitle");
-            const previewMessage = document.getElementById("previewMessage");
-            const previewDate = document.getElementById("previewDate");
-            const previewVenue = document.getElementById("previewVenue");
-            const previewMeta = document.getElementById("previewMeta");
-            const previewAccent = document.getElementById("previewAccent");
+            const scheduleList = document.getElementById("scheduleList");
+            const addScheduleButton = document.getElementById("addScheduleItem");
+            const locationAddress = document.getElementById("locationAddress");
+            const locationLink = document.getElementById("locationLink");
+            const locationOpenLink = document.getElementById("locationOpenLink");
+            const previewContainer = document.getElementById("previewContainer");
 
-            if (!preview || !previewTitle || !previewSubtitle || !previewMessage || !previewDate || !previewVenue || !previewMeta) {
-                return;
-            }
+            const getPreviewElements = () => ({
+                preview: document.getElementById("invitePreview"),
+                previewHeader: document.getElementById("previewHeader"),
+                previewTitle: document.getElementById("previewTitle"),
+                previewSubtitle: document.getElementById("previewSubtitle"),
+                previewMessage: document.getElementById("previewMessage"),
+                previewDate: document.getElementById("previewDate"),
+                previewVenue: document.getElementById("previewVenue"),
+                previewMeta: document.getElementById("previewMeta"),
+                previewAccent: document.getElementById("previewAccent")
+            });
+
+            const buildPreviewTitle = () => {
+                const person1 = person1Input?.value.trim();
+                const person2 = person2Input?.value.trim();
+
+                if (person1 && person2) {
+                    return `${person1} & ${person2}`;
+                }
+
+                if (person1) {
+                    return person1;
+                }
+
+                return contentContainer?.dataset.eventTypeLabel || "Invitation";
+            };
+
+            const buildPreviewSubtitle = () => {
+                const dateText = dateInput?.value.trim();
+                const eventLabel = contentContainer?.dataset.eventTypeLabel || "Event";
+
+                if (dateText) {
+                    return `${eventLabel} · ${dateText}`;
+                }
+
+                return eventLabel;
+            };
 
             const updatePreview = () => {
-                previewTitle.textContent = titleInput?.value.trim() || "Invitation";
-                previewSubtitle.textContent = subtitleInput?.value.trim() || "You're invited";
+                const { preview, previewHeader, previewTitle, previewSubtitle, previewMessage, previewDate, previewVenue, previewMeta, previewAccent } = getPreviewElements();
+
+                if (!preview || !previewTitle || !previewSubtitle || !previewMessage || !previewDate || !previewVenue || !previewMeta) {
+                    return;
+                }
+
+                previewTitle.textContent = buildPreviewTitle();
+                previewSubtitle.textContent = buildPreviewSubtitle();
                 previewMessage.textContent = messageInput?.value.trim() || "";
                 previewDate.textContent = dateInput?.value.trim() || "";
                 previewVenue.textContent = venueInput?.value.trim() || "";
@@ -176,6 +250,11 @@
 
                 if (previewHeader && accentInput) {
                     previewHeader.style.color = accentInput.value;
+                }
+
+                const previewEyebrow = previewHeader?.querySelector(".event-preview-eyebrow");
+                if (previewEyebrow && accentInput) {
+                    previewEyebrow.style.color = accentInput.value;
                 }
 
                 if (preview && backgroundInput) {
@@ -191,7 +270,24 @@
                 }
             };
 
-            [titleInput, subtitleInput, messageInput, dateInput, venueInput, accentInput, backgroundInput, fontInput, layoutInput].forEach((input) => {
+            const updateTemplate = async () => {
+                if (!templateInput) {
+                    return;
+                }
+
+                const response = await fetch(`?handler=Template&id=${encodeURIComponent("@Model.Event?.Id")}&template=${encodeURIComponent(templateInput.value)}`);
+                if (!response.ok) {
+                    return;
+                }
+
+                const html = await response.text();
+                if (previewContainer) {
+                    previewContainer.innerHTML = html;
+                    updatePreview();
+                }
+            };
+
+            [person1Input, person2Input, messageInput, dateInput, venueInput, accentInput, backgroundInput, fontInput, layoutInput].forEach((input) => {
                 if (!input) {
                     return;
                 }
@@ -200,7 +296,151 @@
                 input.addEventListener("change", updatePreview);
             });
 
+            if (templateInput) {
+                templateInput.addEventListener("change", updateTemplate);
+            }
+
+            const defaultPerson1Label = person1Label?.textContent?.trim() ?? "Person 1 name";
+            const defaultPerson2Label = person2Label?.textContent?.trim() ?? "Person 2 name";
+
+            const eventTypeConfig = {
+                Wedding: { person1Label: "Bride name", person2Label: "Groom name" },
+                Engagement: { person1Label: "Fiancée name", person2Label: "Fiancé name" },
+                Anniversary: { person1Label: "Husband name", person2Label: "Wife name" },
+                BabyShower: { person1Label: "Baby name", person2Label: "N/A" },
+                Birthday: { person1Label: "Name", person2Label: "N/A" },
+                Party: { person1Label: "Title", person2Label: "N/A" }
+            };
+
+            const updatePersonFields = () => {
+                if (!contentContainer || !personField1 || !personField2 || !person1Label || !person2Label) {
+                    return;
+                }
+
+                const eventType = contentContainer.dataset.eventType;
+                const config = eventType ? eventTypeConfig[eventType] : null;
+
+                if (!config) {
+                    personField1.hidden = false;
+                    personField2.hidden = false;
+                    person1Label.textContent = defaultPerson1Label;
+                    person2Label.textContent = defaultPerson2Label;
+                    return;
+                }
+
+                personField1.hidden = false;
+                personField2.hidden = false;
+                person1Label.textContent = config.person1Label;
+                person2Label.textContent = config.person2Label;
+
+                if (config.person2Label === "N/A") {
+                    personField2.hidden = true;
+                    person2Label.textContent = defaultPerson2Label;
+                    if (person2Input) {
+                        person2Input.value = "";
+                    }
+                }
+            };
+
+            const applyPalette = (swatch) => {
+                if (!swatch || !accentInput || !backgroundInput) {
+                    return;
+                }
+
+                const accent = swatch.dataset.accent;
+                const background = swatch.dataset.background;
+
+                if (accent) {
+                    accentInput.value = accent;
+                }
+
+                if (background) {
+                    backgroundInput.value = background;
+                }
+
+                paletteSwatches?.querySelectorAll(".event-palette-swatch").forEach((button) => {
+                    button.classList.toggle("is-active", button === swatch);
+                });
+
+                updatePreview();
+            };
+
+            if (paletteSwatches) {
+                paletteSwatches.addEventListener("click", (event) => {
+                    const target = event.target;
+                    if (target instanceof HTMLElement && target.classList.contains("event-palette-swatch")) {
+                        applyPalette(target);
+                    }
+                });
+            }
+
+            const buildMapsLink = (address) => {
+                const trimmed = address.trim();
+                if (!trimmed) {
+                    return "";
+                }
+
+                return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trimmed)}`;
+            };
+
+            const updateMapLink = () => {
+                if (!locationAddress || !locationLink || !locationOpenLink) {
+                    return;
+                }
+
+                const link = buildMapsLink(locationAddress.value);
+                locationLink.value = link;
+                locationOpenLink.href = link || "#";
+                locationOpenLink.classList.toggle("disabled", !link);
+            };
+
+            if (locationAddress) {
+                locationAddress.addEventListener("input", updateMapLink);
+            }
+
+            const createScheduleRow = () => {
+                if (!scheduleList) {
+                    return;
+                }
+
+                const row = document.createElement("div");
+                row.className = "event-schedule-row";
+                row.innerHTML = `
+                    <div>
+                        <label class="form-label">Date</label>
+                        <input class="form-control" type="date" />
+                    </div>
+                    <div>
+                        <label class="form-label">Time</label>
+                        <input class="form-control" type="time" />
+                    </div>
+                    <div>
+                        <label class="form-label">Schedule</label>
+                        <input class="form-control" type="text" placeholder="Ceremony" />
+                    </div>
+                    <div class="event-schedule-actions">
+                        <button class="btn btn-outline-primary btn-sm" type="button">Remove</button>
+                    </div>
+                `;
+
+                row.querySelector("button")?.addEventListener("click", () => {
+                    row.remove();
+                });
+
+                scheduleList.appendChild(row);
+            };
+
+            if (addScheduleButton) {
+                addScheduleButton.addEventListener("click", createScheduleRow);
+            }
+
+            updatePersonFields();
             updatePreview();
+            updateMapLink();
+
+            if (scheduleList && scheduleList.children.length === 0) {
+                createScheduleRow();
+            }
         })();
     </script>
 }

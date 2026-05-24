@@ -1,0 +1,11 @@
+@page "{id:guid}"
+@model InviteStudio.Web.Pages.Events.InvitationModel
+@{
+    ViewData["Title"] = "Invitation";
+}
+
+<div class="invitation-page">
+    <div class="invitation-shell">
+        <partial name="~/Pages/Events/Templates/@(Model.TemplatePartialName).cshtml" model="Model.TemplateModel" />
+    </div>
+</div>

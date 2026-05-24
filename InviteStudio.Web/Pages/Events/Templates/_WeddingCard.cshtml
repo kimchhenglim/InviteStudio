@@ -1,0 +1,24 @@
+@model InviteStudio.Web.Pages.Events.InvitationTemplateModel
+
+<div class="event-preview-shell invite-template invite-template-wedding" id="invitePreview" style="background: @Model.BackgroundColor; font-family: @Model.FontFamily;">
+    <div class="event-preview-header" id="previewHeader" style="color: @Model.AccentColor;">
+        <span class="event-preview-eyebrow">Wedding celebration</span>
+        <h3 id="previewTitle">@Model.Title</h3>
+        <p id="previewSubtitle">@Model.Subtitle</p>
+    </div>
+    <p class="event-preview-message" id="previewMessage">@Model.Message</p>
+    <div class="event-preview-meta" id="previewMeta">
+        <div>
+            <span class="event-preview-label">Date</span>
+            <span id="previewDate">@Model.DateText</span>
+        </div>
+        <div>
+            <span class="event-preview-label">Location</span>
+            <span id="previewVenue">@Model.Venue</span>
+        </div>
+    </div>
+    <div class="event-preview-footer">
+        <span>@Model.FooterLeft</span>
+        <span id="previewAccent" style="color: @Model.AccentColor;">@Model.FooterRight</span>
+    </div>
+</div>
