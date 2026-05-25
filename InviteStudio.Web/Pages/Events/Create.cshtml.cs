@@ -24,7 +24,6 @@ namespace InviteStudio.Web.Pages.Events
 
         public IEnumerable<SelectListItem> EventTypeOptions { get; } =
             Enum.GetValues<EventType>()
-                .TakeWhile(x => x == EventType.Wedding)
                 .Select(type => new SelectListItem
                 {
                     Value = type.ToString(),

@@ -114,23 +114,21 @@
                         <label class="form-label" for="paletteSwatches">Color palette</label>
                         <div class="event-palette" id="paletteSwatches">
                             <button class="event-palette-swatch is-active" type="button" data-accent="#1f8cff" data-background="#ffffff" style="--swatch-accent: #1f8cff; --swatch-bg: #ffffff;"></button>
-                            <button class="event-palette-swatch" type="button" data-accent="#8b5cf6" data-background="#f8f2ff" style="--swatch-accent: #8b5cf6; --swatch-bg: #f8f2ff;"></button>
+                            <button class="event-palette-swatch" type="button" data-accent="#2563eb" data-background="#eff6ff" style="--swatch-accent: #2563eb; --swatch-bg: #eff6ff;"></button>
+                            <button class="event-palette-swatch" type="button" data-accent="#14b8a6" data-background="#ecfeff" style="--swatch-accent: #14b8a6; --swatch-bg: #ecfeff;"></button>
+                            <button class="event-palette-swatch" type="button" data-accent="#0f766e" data-background="#f0fdfa" style="--swatch-accent: #0f766e; --swatch-bg: #f0fdfa;"></button>
+                            <button class="event-palette-swatch" type="button" data-accent="#10b981" data-background="#ecfdf5" style="--swatch-accent: #10b981; --swatch-bg: #ecfdf5;"></button>
+                            <button class="event-palette-swatch" type="button" data-accent="#84cc16" data-background="#f7fee7" style="--swatch-accent: #84cc16; --swatch-bg: #f7fee7;"></button>
                             <button class="event-palette-swatch" type="button" data-accent="#f97316" data-background="#fff7e8" style="--swatch-accent: #f97316; --swatch-bg: #fff7e8;"></button>
-                            <button class="event-palette-swatch" type="button" data-accent="#0f766e" data-background="#ecfeff" style="--swatch-accent: #0f766e; --swatch-bg: #ecfeff;"></button>
+                            <button class="event-palette-swatch" type="button" data-accent="#ea580c" data-background="#fff1e6" style="--swatch-accent: #ea580c; --swatch-bg: #fff1e6;"></button>
+                            <button class="event-palette-swatch" type="button" data-accent="#f59e0b" data-background="#fffbeb" style="--swatch-accent: #f59e0b; --swatch-bg: #fffbeb;"></button>
+                            <button class="event-palette-swatch" type="button" data-accent="#e11d48" data-background="#fff1f2" style="--swatch-accent: #e11d48; --swatch-bg: #fff1f2;"></button>
+                            <button class="event-palette-swatch" type="button" data-accent="#db2777" data-background="#fdf2f8" style="--swatch-accent: #db2777; --swatch-bg: #fdf2f8;"></button>
+                            <button class="event-palette-swatch" type="button" data-accent="#8b5cf6" data-background="#f8f2ff" style="--swatch-accent: #8b5cf6; --swatch-bg: #f8f2ff;"></button>
+                            <button class="event-palette-swatch" type="button" data-accent="#6366f1" data-background="#eef2ff" style="--swatch-accent: #6366f1; --swatch-bg: #eef2ff;"></button>
+                            <button class="event-palette-swatch" type="button" data-accent="#4f46e5" data-background="#eef2ff" style="--swatch-accent: #4f46e5; --swatch-bg: #eef2ff;"></button>
+                            <button class="event-palette-swatch" type="button" data-accent="#0ea5e9" data-background="#f0f9ff" style="--swatch-accent: #0ea5e9; --swatch-bg: #f0f9ff;"></button>
                         </div>
-                    </div>
-                    <div>
-                        <label class="form-label" for="accentColor">Accent color</label>
-                        <input class="form-control form-control-color" id="accentColor" type="color" value="@previewModel.AccentColor" />
-                    </div>
-                    <div>
-                        <label class="form-label" for="backgroundTone">Background tone</label>
-                        <select class="form-select" id="backgroundTone">
-                            <option value="#ffffff" selected>Soft white</option>
-                            <option value="#f8f2ff">Lavender mist</option>
-                            <option value="#f0f7ff">Powder blue</option>
-                            <option value="#fff7e8">Golden cream</option>
-                        </select>
                     </div>
                     <div>
                         <label class="form-label" for="fontStyle">Font style</label>
@@ -182,8 +180,8 @@
             const venueInput = document.getElementById("cardVenue");
             const templateInput = document.getElementById("templateSelect");
             const paletteSwatches = document.getElementById("paletteSwatches");
-            const accentInput = document.getElementById("accentColor");
-            const backgroundInput = document.getElementById("backgroundTone");
+            const accentState = { value: "@previewModel.AccentColor" };
+            const backgroundState = { value: "@previewModel.BackgroundColor" };
             const fontInput = document.getElementById("fontStyle");
             const layoutInput = document.getElementById("layoutStyle");
             const scheduleList = document.getElementById("scheduleList");
@@ -244,21 +242,21 @@
                 previewDate.textContent = dateInput?.value.trim() || "";
                 previewVenue.textContent = venueInput?.value.trim() || "";
 
-                if (previewAccent && accentInput) {
-                    previewAccent.style.color = accentInput.value;
+                if (previewAccent) {
+                    previewAccent.style.color = accentState.value;
                 }
 
-                if (previewHeader && accentInput) {
-                    previewHeader.style.color = accentInput.value;
+                if (previewHeader) {
+                    previewHeader.style.color = accentState.value;
                 }
 
                 const previewEyebrow = previewHeader?.querySelector(".event-preview-eyebrow");
-                if (previewEyebrow && accentInput) {
-                    previewEyebrow.style.color = accentInput.value;
+                if (previewEyebrow) {
+                    previewEyebrow.style.color = accentState.value;
                 }
 
-                if (preview && backgroundInput) {
-                    preview.style.background = backgroundInput.value;
+                if (preview) {
+                    preview.style.background = backgroundState.value;
                 }
 
                 if (preview && fontInput) {
@@ -287,7 +285,7 @@
                 }
             };
 
-            [person1Input, person2Input, messageInput, dateInput, venueInput, accentInput, backgroundInput, fontInput, layoutInput].forEach((input) => {
+            [person1Input, person2Input, messageInput, dateInput, venueInput, fontInput, layoutInput].forEach((input) => {
                 if (!input) {
                     return;
                 }
@@ -343,7 +341,7 @@
             };
 
             const applyPalette = (swatch) => {
-                if (!swatch || !accentInput || !backgroundInput) {
+                if (!swatch) {
                     return;
                 }
 
@@ -351,11 +349,11 @@
                 const background = swatch.dataset.background;
 
                 if (accent) {
-                    accentInput.value = accent;
+                    accentState.value = accent;
                 }
 
                 if (background) {
-                    backgroundInput.value = background;
+                    backgroundState.value = background;
                 }
 
                 paletteSwatches?.querySelectorAll(".event-palette-swatch").forEach((button) => {
