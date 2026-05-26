@@ -71,7 +71,7 @@
                 </div>
                 <div class="event-design-grid">
                     <div id="scheduleList" class="event-schedule-list"></div>
-                    <button class="btn btn-outline-primary" id="addScheduleItem" type="button">Add schedule item</button>
+                    <button class="btn btn-outline-primary" id="addScheduleDate" type="button">Add date</button>
                 </div>
             </section>
             <section class="event-detail-card">
@@ -185,7 +185,7 @@
             const fontInput = document.getElementById("fontStyle");
             const layoutInput = document.getElementById("layoutStyle");
             const scheduleList = document.getElementById("scheduleList");
-            const addScheduleButton = document.getElementById("addScheduleItem");
+            const addScheduleDateButton = document.getElementById("addScheduleDate");
             const locationAddress = document.getElementById("locationAddress");
             const locationLink = document.getElementById("locationLink");
             const locationOpenLink = document.getElementById("locationOpenLink");
@@ -396,28 +396,108 @@
                 locationAddress.addEventListener("input", updateMapLink);
             }
 
-            const createScheduleRow = () => {
-                if (!scheduleList) {
+            let draggedScheduleItem = null;
+            let isPointerDragging = false;
+            const dropIndicator = document.createElement("div");
+            dropIndicator.className = "event-schedule-drop";
+
+            const startPointerDrag = (item, event) => {
+                if (!item || event.pointerType === "mouse") {
+                    return;
+                }
+
+                draggedScheduleItem = item;
+                isPointerDragging = true;
+                item.classList.add("is-dragging", "is-pointer-dragging");
+                item.setPointerCapture(event.pointerId);
+                event.preventDefault();
+            };
+
+            const updatePointerDrag = (event) => {
+                if (!isPointerDragging || !draggedScheduleItem) {
+                    return;
+                }
+
+                const target = document.elementFromPoint(event.clientX, event.clientY);
+                const list = target?.closest(".event-schedule-items");
+                if (!list) {
+                    return;
+                }
+
+                event.preventDefault();
+                const afterElement = getDragAfterElement(list, event.clientY);
+                if (afterElement) {
+                    list.insertBefore(dropIndicator, afterElement);
+                } else {
+                    list.appendChild(dropIndicator);
+                }
+            };
+
+            const endPointerDrag = (event) => {
+                if (!isPointerDragging || !draggedScheduleItem) {
+                    return;
+                }
+
+                event.preventDefault();
+                draggedScheduleItem.releasePointerCapture(event.pointerId);
+                draggedScheduleItem.classList.remove("is-dragging", "is-pointer-dragging");
+
+                if (dropIndicator.parentElement) {
+                    dropIndicator.parentElement.insertBefore(draggedScheduleItem, dropIndicator);
+                    dropIndicator.remove();
+                }
+
+                draggedScheduleItem = null;
+                isPointerDragging = false;
+            };
+
+            const setScheduleItemDraggable = (item) => {
+                if (!item) {
+                    return;
+                }
+
+                item.draggable = true;
+                const handle = item.querySelector(".event-schedule-handle");
+                if (handle) {
+                    handle.addEventListener("pointerdown", (event) => {
+                        startPointerDrag(item, event);
+                    });
+                }
+
+                item.addEventListener("dragstart", (event) => {
+                    draggedScheduleItem = item;
+                    item.classList.add("is-dragging");
+                    event.dataTransfer.effectAllowed = "move";
+                    event.dataTransfer.setData("text/plain", "schedule-item");
+                });
+                item.addEventListener("dragend", () => {
+                    item.classList.remove("is-dragging");
+                    draggedScheduleItem = null;
+                    document.querySelectorAll(".event-schedule-items.is-drop-target").forEach((list) => {
+                        list.classList.remove("is-drop-target");
+                    });
+                });
+            };
+
+            const createScheduleItemRow = (list) => {
+                if (!list) {
                     return;
                 }
 
                 const row = document.createElement("div");
-                row.className = "event-schedule-row";
+                row.className = "event-schedule-item";
                 row.innerHTML = `
-                    <div>
-                        <label class="form-label">Date</label>
-                        <input class="form-control" type="date" />
-                    </div>
-                    <div>
+                    <div class="event-schedule-handle" title="Drag to reorder" aria-hidden="true">⋮⋮</div>
+                    <div class="event-schedule-input">
                         <label class="form-label">Time</label>
                         <input class="form-control" type="time" />
                     </div>
-                    <div>
+                    <div class="event-schedule-input">
                         <label class="form-label">Schedule</label>
                         <input class="form-control" type="text" placeholder="Ceremony" />
                     </div>
                     <div class="event-schedule-actions">
-                        <button class="btn btn-outline-primary btn-sm" type="button">Remove</button>
+                        <button class="btn btn-outline-danger btn-sm" type="button">Remove</button>
                     </div>
                 `;
 
@@ -425,19 +505,125 @@
                     row.remove();
                 });
 
-                scheduleList.appendChild(row);
+                setScheduleItemDraggable(row);
+
+                list.appendChild(row);
             };
 
-            if (addScheduleButton) {
-                addScheduleButton.addEventListener("click", createScheduleRow);
+            const createScheduleGroup = () => {
+                if (!scheduleList) {
+                    return;
+                }
+
+                const group = document.createElement("div");
+                group.className = "event-schedule-card";
+                group.innerHTML = `
+                    <div class="event-schedule-card-header">
+                        <div>
+                            <label class="form-label">Date</label>
+                            <input class="form-control" type="date" />
+                        </div>
+                        <button class="btn btn-outline-danger btn-sm" type="button" data-action="remove-date">Remove date</button>
+                    </div>
+                    <div class="event-schedule-items"></div>
+                    <button class="btn btn-outline-primary btn-sm event-schedule-add" type="button" data-action="add-item">Add time</button>
+                `;
+
+                const itemList = group.querySelector(".event-schedule-items");
+                group.querySelector("[data-action='remove-date']")?.addEventListener("click", () => {
+                    group.remove();
+                });
+
+                group.querySelector("[data-action='add-item']")?.addEventListener("click", () => {
+                    createScheduleItemRow(itemList);
+                });
+
+                createScheduleItemRow(itemList);
+                scheduleList.appendChild(group);
+            };
+
+            if (addScheduleDateButton) {
+                addScheduleDateButton.addEventListener("click", createScheduleGroup);
             }
+
+            const getDragAfterElement = (list, y) => {
+                const items = [...list.querySelectorAll(".event-schedule-item:not(.is-dragging)")];
+                return items.reduce(
+                    (closest, child) => {
+                        const box = child.getBoundingClientRect();
+                        const offset = y - box.top - box.height / 2;
+                        if (offset < 0 && offset > closest.offset) {
+                            return { offset, element: child };
+                        }
+                        return closest;
+                    },
+                    { offset: Number.NEGATIVE_INFINITY, element: null }
+                ).element;
+            };
+
+            if (scheduleList) {
+                scheduleList.addEventListener("dragover", (event) => {
+                    if (!draggedScheduleItem) {
+                        return;
+                    }
+
+                    const list = event.target.closest(".event-schedule-items");
+                    if (!list) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    const afterElement = getDragAfterElement(list, event.clientY);
+                    if (afterElement) {
+                        list.insertBefore(dropIndicator, afterElement);
+                    } else {
+                        list.appendChild(dropIndicator);
+                    }
+                });
+
+                scheduleList.addEventListener("dragleave", (event) => {
+                    const list = event.target.closest(".event-schedule-items");
+                    if (!list) {
+                        return;
+                    }
+
+                    if (event.relatedTarget && list.contains(event.relatedTarget)) {
+                        return;
+                    }
+
+                    if (dropIndicator.parentElement === list) {
+                        dropIndicator.remove();
+                    }
+                });
+
+                scheduleList.addEventListener("drop", (event) => {
+                    if (!draggedScheduleItem) {
+                        return;
+                    }
+
+                    const list = event.target.closest(".event-schedule-items");
+                    if (!list) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    if (dropIndicator.parentElement === list) {
+                        list.insertBefore(draggedScheduleItem, dropIndicator);
+                        dropIndicator.remove();
+                    }
+                });
+            }
+
+            document.addEventListener("pointermove", updatePointerDrag);
+            document.addEventListener("pointerup", endPointerDrag);
+            document.addEventListener("pointercancel", endPointerDrag);
 
             updatePersonFields();
             updatePreview();
             updateMapLink();
 
             if (scheduleList && scheduleList.children.length === 0) {
-                createScheduleRow();
+                createScheduleGroup();
             }
         })();
     </script>
