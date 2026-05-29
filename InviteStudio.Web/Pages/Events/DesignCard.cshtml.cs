@@ -21,6 +21,9 @@ namespace InviteStudio.Web.Pages.Events
 
         public Event? Event { get; private set; }
 
+        [BindProperty]
+        public DesignCardInputModel Input { get; set; } = new();
+
         public InvitationTemplateModel TemplateModel { get; private set; } = new();
 
         public string TemplatePartialName { get; private set; } = "_DefaultCard";
@@ -39,6 +42,15 @@ namespace InviteStudio.Web.Pages.Events
             TemplateOptions = BuildTemplateOptions(Event.EventType);
             TemplatePartialName = SelectTemplate(Event.EventType);
             TemplateModel = BuildTemplateModel(Event);
+            Input = new DesignCardInputModel
+            {
+                EventId = Event.Id,
+                Person1Name = Event.Person1Name,
+                Person2Name = Event.Person2Name,
+                EventDate = Event.EventDate,
+                Venue = Event.Venue,
+                VenueMapLink = Event.VenueMapLink
+            };
 
             return Page();
         }
@@ -61,6 +73,30 @@ namespace InviteStudio.Web.Pages.Events
                 ViewName = $"~/Pages/Events/Templates/{TemplatePartialName}.cshtml",
                 ViewData = new Microsoft.AspNetCore.Mvc.ViewFeatures.ViewDataDictionary<InvitationTemplateModel>(ViewData, TemplateModel)
             };
+        }
+
+        public async Task<IActionResult> OnPostAsync()
+        {
+            if (Input.EventId == Guid.Empty)
+            {
+                return Page();
+            }
+
+            var @event = await _dbContext.Events.FirstOrDefaultAsync(item => item.Id == Input.EventId);
+            if (@event == null)
+            {
+                return NotFound();
+            }
+
+            @event.Person1Name = Input.Person1Name?.Trim() ?? string.Empty;
+            @event.Person2Name = Input.Person2Name?.Trim() ?? string.Empty;
+            @event.EventDate = Input.EventDate == default ? @event.EventDate : Input.EventDate;
+            @event.Venue = Input.Venue?.Trim() ?? string.Empty;
+            @event.VenueMapLink = Input.VenueMapLink?.Trim() ?? string.Empty;
+
+            await _dbContext.SaveChangesAsync();
+
+            return RedirectToPage("/Events/DesignCard", new { id = Input.EventId });
         }
 
         internal static string BuildEventTitle(Event @event)
@@ -145,6 +181,7 @@ namespace InviteStudio.Web.Pages.Events
                 Message = "We would love to celebrate with you. Please join us for our special day.",
                 DateText = @event.EventDate.ToString("MMMM dd, yyyy"),
                 Venue = @event.Venue,
+                VenueMapLink = @event.VenueMapLink,
                 AccentColor = "#1f8cff",
                 BackgroundColor = "#ffffff",
                 FontFamily = "'Segoe UI', sans-serif",
@@ -164,6 +201,7 @@ namespace InviteStudio.Web.Pages.Events
         public string Message { get; set; } = string.Empty;
         public string DateText { get; set; } = string.Empty;
         public string Venue { get; set; } = string.Empty;
+        public string VenueMapLink { get; set; } = string.Empty;
         public string AccentColor { get; set; } = "#1f8cff";
         public string BackgroundColor { get; set; } = "#ffffff";
         public string FontFamily { get; set; } = "'Segoe UI', sans-serif";
@@ -172,4 +210,14 @@ namespace InviteStudio.Web.Pages.Events
     }
 
     public record TemplateOption(string Value, string Label);
+
+    public class DesignCardInputModel
+    {
+        public Guid EventId { get; set; }
+        public string Person1Name { get; set; } = string.Empty;
+        public string Person2Name { get; set; } = string.Empty;
+        public DateTime EventDate { get; set; }
+        public string Venue { get; set; } = string.Empty;
+        public string VenueMapLink { get; set; } = string.Empty;
+    }
 }

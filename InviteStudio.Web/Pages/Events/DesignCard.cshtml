@@ -20,15 +20,17 @@
                 <p class="event-detail-subtitle">@previewModel.Subtitle</p>
             </div>
             <div class="event-detail-actions">
-                <button class="btn btn-primary" type="button">Save changes</button>
+                <button class="btn btn-primary" type="submit" form="designForm">Save changes</button>
                 <a class="btn btn-outline-primary" asp-page="/Events/Details" asp-route-id="@Model.Event?.Id">Back to overview</a>
             </div>
         </div>
     </div>
 </div>
 
-<div class="container pb-5">
-    <div class="row g-4">
+<form method="post" id="designForm">
+    <input type="hidden" asp-for="Input.EventId" />
+    <div class="container pb-5">
+        <div class="row g-4">
         <div class="col-12 col-lg-7">
             <section class="event-detail-card">
                 <div class="event-detail-section">
@@ -40,11 +42,11 @@
                 <div class="event-design-grid" id="cardContent" data-event-type="@Model.Event?.EventType" data-event-type-label="@previewModel.EventTypeLabel">
                     <div id="personField1">
                         <label class="form-label" id="person1Label" for="cardPerson1">Person 1 name</label>
-                        <input class="form-control" id="cardPerson1" value="@previewModel.Person1Name" />
+                        <input class="form-control" id="cardPerson1" asp-for="Input.Person1Name" value="@previewModel.Person1Name" />
                     </div>
                     <div id="personField2">
                         <label class="form-label" id="person2Label" for="cardPerson2">Person 2 name</label>
-                        <input class="form-control" id="cardPerson2" value="@previewModel.Person2Name" />
+                        <input class="form-control" id="cardPerson2" asp-for="Input.Person2Name" value="@previewModel.Person2Name" />
                     </div>
                     <div>
                         <label class="form-label" for="cardMessage">Message</label>
@@ -53,11 +55,11 @@
                     <div class="event-design-row">
                         <div>
                             <label class="form-label" for="cardDate">Event date</label>
-                            <input class="form-control" id="cardDate" value="@previewModel.DateText" />
+                            <input class="form-control" id="cardDate" asp-for="Input.EventDate" type="date" value="@Model.Input.EventDate.ToString("yyyy-MM-dd")" />
                         </div>
                         <div>
                             <label class="form-label" for="cardVenue">Venue</label>
-                            <input class="form-control" id="cardVenue" value="@previewModel.Venue" />
+                            <input class="form-control" id="cardVenue" asp-for="Input.Venue" value="@previewModel.Venue" />
                         </div>
                     </div>
                 </div>
@@ -83,12 +85,13 @@
                 </div>
                 <div class="event-design-grid">
                     <div>
-                        <label class="form-label" for="locationAddress">Address</label>
-                        <input class="form-control" id="locationAddress" value="@previewModel.Venue" placeholder="Enter venue address" />
+                        <label class="form-label" for="locationLink">Venue map link</label>
+                        <input class="form-control" id="locationLink" asp-for="Input.VenueMapLink" value="@previewModel.VenueMapLink" readonly />
                     </div>
                     <div>
-                        <label class="form-label" for="locationLink">Google Maps link</label>
-                        <input class="form-control" id="locationLink" readonly />
+                        <label class="form-label">Pick location</label>
+                        <div class="event-map" id="eventMap"></div>
+                        <span class="form-text text-muted">Click the map to drop a pin. Drag to adjust the location.</span>
                     </div>
                     <a class="btn btn-outline-primary btn-sm" id="locationOpenLink" href="#" target="_blank" rel="noopener">Open map</a>
                 </div>
@@ -162,10 +165,13 @@
                 </div>
             </section>
         </div>
+        </div>
     </div>
-</div>
+</form>
 
 @section Scripts {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
         (() => {
             const contentContainer = document.getElementById("cardContent");
@@ -186,9 +192,9 @@
             const layoutInput = document.getElementById("layoutStyle");
             const scheduleList = document.getElementById("scheduleList");
             const addScheduleDateButton = document.getElementById("addScheduleDate");
-            const locationAddress = document.getElementById("locationAddress");
             const locationLink = document.getElementById("locationLink");
             const locationOpenLink = document.getElementById("locationOpenLink");
+            const mapElement = document.getElementById("eventMap");
             const previewContainer = document.getElementById("previewContainer");
 
             const getPreviewElements = () => ({
@@ -229,6 +235,19 @@
                 return eventLabel;
             };
 
+            const formatDateDisplay = (value) => {
+                if (!value) {
+                    return "";
+                }
+
+                const parsed = new Date(value);
+                if (Number.isNaN(parsed.getTime())) {
+                    return value;
+                }
+
+                return parsed.toLocaleDateString("en-US", { month: "long", day: "2-digit", year: "numeric" });
+            };
+
             const updatePreview = () => {
                 const { preview, previewHeader, previewTitle, previewSubtitle, previewMessage, previewDate, previewVenue, previewMeta, previewAccent } = getPreviewElements();
 
@@ -239,7 +258,7 @@
                 previewTitle.textContent = buildPreviewTitle();
                 previewSubtitle.textContent = buildPreviewSubtitle();
                 previewMessage.textContent = messageInput?.value.trim() || "";
-                previewDate.textContent = dateInput?.value.trim() || "";
+                previewDate.textContent = formatDateDisplay(dateInput?.value.trim());
                 previewVenue.textContent = venueInput?.value.trim() || "";
 
                 if (previewAccent) {
@@ -372,28 +391,83 @@
                 });
             }
 
-            const buildMapsLink = (address) => {
-                const trimmed = address.trim();
-                if (!trimmed) {
-                    return "";
-                }
-
-                return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trimmed)}`;
-            };
-
-            const updateMapLink = () => {
-                if (!locationAddress || !locationLink || !locationOpenLink) {
+            const updateMapLink = (link) => {
+                if (!locationLink || !locationOpenLink) {
                     return;
                 }
 
-                const link = buildMapsLink(locationAddress.value);
                 locationLink.value = link;
                 locationOpenLink.href = link || "#";
                 locationOpenLink.classList.toggle("disabled", !link);
             };
 
-            if (locationAddress) {
-                locationAddress.addEventListener("input", updateMapLink);
+            const parseMapLink = (link) => {
+                if (!link) {
+                    return null;
+                }
+
+                try {
+                    const url = new URL(link);
+                    const query = url.searchParams.get("query");
+                    if (!query) {
+                        return null;
+                    }
+
+                    const parts = query.split(",");
+                    if (parts.length < 2) {
+                        return null;
+                    }
+
+                    const lat = Number.parseFloat(parts[0]);
+                    const lng = Number.parseFloat(parts[1]);
+                    if (Number.isNaN(lat) || Number.isNaN(lng)) {
+                        return null;
+                    }
+
+                    return { lat, lng };
+                } catch {
+                    return null;
+                }
+            };
+
+            if (mapElement && locationLink && window.L) {
+                const map = L.map(mapElement).setView([-34.9285, 138.6007], 4);
+                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                    attribution: "&copy; OpenStreetMap contributors"
+                }).addTo(map);
+
+                let marker;
+
+                const updateFromLatLng = (latlng) => {
+                    const link = `https://www.google.com/maps/search/?api=1&query=${latlng.lat},${latlng.lng}`;
+                    updateMapLink(link);
+                };
+
+                const placeMarker = (latlng) => {
+                    if (!marker) {
+                        marker = L.marker(latlng, { draggable: true }).addTo(map);
+                        marker.on("dragend", () => {
+                            const position = marker.getLatLng();
+                            updateFromLatLng(position);
+                        });
+                    } else {
+                        marker.setLatLng(latlng);
+                    }
+
+                    updateFromLatLng(latlng);
+                };
+
+                map.on("click", (event) => {
+                    placeMarker(event.latlng);
+                });
+
+                const existingLocation = parseMapLink(locationLink.value);
+                if (existingLocation) {
+                    placeMarker(existingLocation);
+                    map.setView(existingLocation, 12);
+                } else if (locationLink.value) {
+                    updateMapLink(locationLink.value);
+                }
             }
 
             let draggedScheduleItem = null;
@@ -620,7 +694,7 @@
 
             updatePersonFields();
             updatePreview();
-            updateMapLink();
+            updateMapLink(locationLink?.value ?? "");
 
             if (scheduleList && scheduleList.children.length === 0) {
                 createScheduleGroup();
