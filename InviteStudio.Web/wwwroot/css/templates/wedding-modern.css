@@ -1,0 +1,81 @@
+.invite-template-wedding-modern {
+  position: relative;
+  overflow: hidden;
+}
+
+.invite-template-wedding-modern .event-preview-eyebrow {
+  color: #a785ff;
+}
+
+.wedding-hearts {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.invite-template-wedding-modern .event-preview-header,
+.invite-template-wedding-modern .event-preview-message,
+.invite-template-wedding-modern .event-preview-meta,
+.invite-template-wedding-modern .event-preview-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.wedding-heart {
+  position: absolute;
+  bottom: -24px;
+  width: var(--heart-size, 18px);
+  height: var(--heart-size, 18px);
+  background: rgba(255, 123, 166, 0.55);
+  transform: rotate(-45deg);
+  animation: wedding-heart-float var(--heart-duration, 7s) ease-in forwards,
+    wedding-heart-sway var(--heart-sway-duration, 3.6s) ease-in-out infinite;
+  opacity: var(--heart-opacity, 0.75);
+  filter: drop-shadow(0 6px 10px rgba(255, 123, 166, 0.25));
+}
+
+.wedding-heart::before,
+.wedding-heart::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: inherit;
+  border-radius: 50%;
+}
+
+.wedding-heart::before {
+  top: -50%;
+  left: 0;
+}
+
+.wedding-heart::after {
+  left: 50%;
+  top: 0;
+}
+
+@keyframes wedding-heart-float {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(-45deg) scale(var(--heart-scale, 1));
+    opacity: 0;
+  }
+  12% {
+    opacity: var(--heart-opacity, 0.75);
+  }
+  100% {
+    transform: translate3d(var(--heart-drift, 0px), -130%, 0) rotate(-45deg) scale(calc(var(--heart-scale, 1) * 1.12));
+    opacity: 0;
+  }
+}
+
+@keyframes wedding-heart-sway {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(var(--heart-sway, 12px));
+  }
+}

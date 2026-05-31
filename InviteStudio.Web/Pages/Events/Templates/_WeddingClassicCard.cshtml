@@ -18,6 +18,40 @@
             <span id="previewVenue">@Model.Venue</span>
         </div>
     </div>
+    <div class="event-preview-contacts">
+        <div class="event-preview-contact @(string.IsNullOrWhiteSpace(Model.Person1Phone) ? "is-empty" : "")">
+            <span class="event-preview-label">Mobile</span>
+            <span id="previewPhone1">@Model.Person1Phone</span>
+        </div>
+        <div class="event-preview-contact @(string.IsNullOrWhiteSpace(Model.Person2Phone) ? "is-empty" : "")">
+            <span class="event-preview-label">Mobile</span>
+            <span id="previewPhone2">@Model.Person2Phone</span>
+        </div>
+    </div>
+    <div class="event-preview-media" id="previewVideoWrapper" @(string.IsNullOrWhiteSpace(Model.VideoEmbedLink) ? "hidden" : "")>
+        <span class="event-preview-label">Video</span>
+        <div class="event-preview-video">
+            <iframe id="previewVideo" src="@Model.VideoEmbedLink" title="Event video" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+        </div>
+    </div>
+    <div class="event-preview-audio" id="previewAudioWrapper" @(string.IsNullOrWhiteSpace(Model.MusicLink) ? "hidden" : "")>
+        <span class="event-preview-label">Music</span>
+        <div class="event-preview-audio-controls">
+            <button class="btn btn-outline-primary btn-sm event-audio-toggle event-audio-float" type="button" data-audio-toggle data-audio-state="paused" aria-label="Play music">
+                <span class="event-audio-icon" aria-hidden="true"></span>
+            </button>
+        </div>
+        @if (Model.MusicEmbedType == "youtube")
+        {
+            <div class="event-preview-music-embed" data-audio-embed>
+                <iframe id="previewAudio" src="@Model.MusicEmbedLinkMuted" data-audio-muted="@Model.MusicEmbedLinkMuted" data-audio-unmuted="@Model.MusicEmbedLink" title="Background music" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
+        }
+        else
+        {
+            <audio id="previewAudio" src="@Model.MusicLink" loop autoplay data-audio-autoplay="true"></audio>
+        }
+    </div>
     <div class="event-preview-footer">
         <span>@Model.FooterLeft</span>
         <span id="previewAccent" style="color: @Model.AccentColor;">@Model.FooterRight</span>

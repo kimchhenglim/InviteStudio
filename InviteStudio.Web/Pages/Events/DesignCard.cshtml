@@ -49,6 +49,14 @@
                         <input class="form-control" id="cardPerson2" asp-for="Input.Person2Name" value="@previewModel.Person2Name" />
                     </div>
                     <div>
+                        <label class="form-label" for="cardPerson1Phone">Person 1 mobile</label>
+                        <input class="form-control" id="cardPerson1Phone" asp-for="Input.Person1Phone" value="@previewModel.Person1Phone" />
+                    </div>
+                    <div>
+                        <label class="form-label" for="cardPerson2Phone">Person 2 mobile</label>
+                        <input class="form-control" id="cardPerson2Phone" asp-for="Input.Person2Phone" value="@previewModel.Person2Phone" />
+                    </div>
+                    <div>
                         <label class="form-label" for="cardMessage">Message</label>
                         <textarea class="form-control" id="cardMessage" rows="4">@previewModel.Message</textarea>
                     </div>
@@ -56,10 +64,6 @@
                         <div>
                             <label class="form-label" for="cardDate">Event date</label>
                             <input class="form-control" id="cardDate" asp-for="Input.EventDate" type="date" value="@Model.Input.EventDate.ToString("yyyy-MM-dd")" />
-                        </div>
-                        <div>
-                            <label class="form-label" for="cardVenue">Venue</label>
-                            <input class="form-control" id="cardVenue" asp-for="Input.Venue" value="@previewModel.Venue" />
                         </div>
                     </div>
                 </div>
@@ -85,6 +89,10 @@
                 </div>
                 <div class="event-design-grid">
                     <div>
+                        <label class="form-label" for="cardVenue">Venue</label>
+                        <input class="form-control" id="cardVenue" asp-for="Input.Venue" value="@previewModel.Venue" />
+                    </div>
+                    <div>
                         <label class="form-label" for="locationLink">Venue map link</label>
                         <input class="form-control" id="locationLink" asp-for="Input.VenueMapLink" value="@previewModel.VenueMapLink" readonly />
                     </div>
@@ -94,6 +102,24 @@
                         <span class="form-text text-muted">Click the map to drop a pin. Drag to adjust the location.</span>
                     </div>
                     <a class="btn btn-outline-primary btn-sm" id="locationOpenLink" href="#" target="_blank" rel="noopener">Open map</a>
+                </div>
+            </section>
+            <section class="event-detail-card">
+                <div class="event-detail-section">
+                    <div>
+                        <span class="event-detail-label">Media</span>
+                        <h2>Video and music</h2>
+                    </div>
+                </div>
+                <div class="event-design-grid">
+                    <div>
+                        <label class="form-label" for="cardVideoLink">Video link</label>
+                        <input class="form-control" id="cardVideoLink" asp-for="Input.VideoLink" value="@previewModel.VideoLink" placeholder="YouTube, Google Drive, OneDrive" />
+                    </div>
+                    <div>
+                        <label class="form-label" for="cardMusicLink">Music link</label>
+                        <input class="form-control" id="cardMusicLink" asp-for="Input.MusicLink" value="@previewModel.MusicLink" placeholder="YouTube, Google Drive, OneDrive" />
+                    </div>
                 </div>
             </section>
             <section class="event-detail-card">
@@ -170,8 +196,16 @@
 </form>
 
 @section Scripts {
+    @foreach (var asset in Model.TemplateAssets)
+    {
+        <link rel="stylesheet" href="~/css/templates/@(asset).css" asp-append-version="true" />
+    }
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    @foreach (var asset in Model.TemplateAssets)
+    {
+        <script src="~/js/templates/@(asset).js" asp-append-version="true"></script>
+    }
     <script>
         (() => {
             const contentContainer = document.getElementById("cardContent");
@@ -181,9 +215,13 @@
             const person2Label = document.getElementById("person2Label");
             const person1Input = document.getElementById("cardPerson1");
             const person2Input = document.getElementById("cardPerson2");
+            const person1PhoneInput = document.getElementById("cardPerson1Phone");
+            const person2PhoneInput = document.getElementById("cardPerson2Phone");
             const messageInput = document.getElementById("cardMessage");
             const dateInput = document.getElementById("cardDate");
             const venueInput = document.getElementById("cardVenue");
+            const videoLinkInput = document.getElementById("cardVideoLink");
+            const musicLinkInput = document.getElementById("cardMusicLink");
             const templateInput = document.getElementById("templateSelect");
             const paletteSwatches = document.getElementById("paletteSwatches");
             const accentState = { value: "@previewModel.AccentColor" };
@@ -206,7 +244,13 @@
                 previewDate: document.getElementById("previewDate"),
                 previewVenue: document.getElementById("previewVenue"),
                 previewMeta: document.getElementById("previewMeta"),
-                previewAccent: document.getElementById("previewAccent")
+                previewAccent: document.getElementById("previewAccent"),
+                previewPhone1: document.getElementById("previewPhone1"),
+                previewPhone2: document.getElementById("previewPhone2"),
+                previewVideo: document.getElementById("previewVideo"),
+                previewAudio: document.getElementById("previewAudio"),
+                previewVideoWrapper: document.getElementById("previewVideoWrapper"),
+                previewAudioWrapper: document.getElementById("previewAudioWrapper")
             });
 
             const buildPreviewTitle = () => {
@@ -222,6 +266,71 @@
                 }
 
                 return contentContainer?.dataset.eventTypeLabel || "Invitation";
+            };
+
+            const setAudioButtonState = (button, isPlaying) => {
+                button.dataset.audioState = isPlaying ? "playing" : "paused";
+                button.setAttribute("aria-label", isPlaying ? "Pause music" : "Play music");
+                button.classList.toggle("is-playing", isPlaying);
+            };
+
+            const updateAudioControls = () => {
+                document.querySelectorAll("[data-audio-toggle]").forEach((button) => {
+                    button.addEventListener("click", (event) => {
+                        event.stopPropagation();
+                        const wrapper = button.closest(".event-preview-audio");
+                        const audio = wrapper?.querySelector("audio");
+                        const iframe = wrapper?.querySelector("iframe");
+                        if (!audio) {
+                            if (iframe) {
+                                const src = iframe.getAttribute("src");
+                                const mutedSrc = iframe.dataset.audioMuted;
+                                const unmutedSrc = iframe.dataset.audioUnmuted;
+                                if (src && unmutedSrc && src === unmutedSrc) {
+                                    iframe.setAttribute("src", mutedSrc || "");
+                                    setAudioButtonState(button, false);
+                                } else {
+                                    iframe.setAttribute("src", unmutedSrc || mutedSrc || "");
+                                    setAudioButtonState(button, true);
+                                }
+                            }
+                            return;
+                        }
+
+                        if (audio.paused) {
+                            audio.play().catch(() => {
+                            });
+                            setAudioButtonState(button, true);
+                        } else {
+                            audio.pause();
+                            setAudioButtonState(button, false);
+                        }
+                    });
+
+                    const wrapper = button.closest(".event-preview-audio");
+                    const audio = wrapper?.querySelector("audio");
+                    const iframe = wrapper?.querySelector("iframe");
+                    if (audio?.dataset.audioAutoplay === "true") {
+                        audio.play().then(() => {
+                            setAudioButtonState(button, true);
+                        }).catch(() => {
+                            setAudioButtonState(button, false);
+                        });
+                    }
+
+                    if (iframe && iframe.getAttribute("src")) {
+                        iframe.dataset.audioMuted = iframe.getAttribute("src") ?? "";
+                        if (!iframe.dataset.audioUnmuted) {
+                            iframe.dataset.audioUnmuted = iframe.dataset.audioMuted;
+                        }
+                    }
+
+                    if (!button.dataset.audioState) {
+                        const current = iframe?.getAttribute("src") ?? "";
+                        const unmuted = iframe?.dataset.audioUnmuted ?? "";
+                        setAudioButtonState(button, current !== "" && current === unmuted);
+                    }
+                });
             };
 
             const buildPreviewSubtitle = () => {
@@ -248,8 +357,92 @@
                 return parsed.toLocaleDateString("en-US", { month: "long", day: "2-digit", year: "numeric" });
             };
 
+            const buildEmbedLink = (link) => {
+                if (!link) {
+                    return "";
+                }
+
+                try {
+                    const url = new URL(link);
+                    if (url.hostname.includes("youtu.be")) {
+                        const id = url.pathname.replace("/", "");
+                        return id ? `https://www.youtube.com/embed/${id}` : link;
+                    }
+
+                    if (url.hostname.includes("youtube.com")) {
+                        const id = url.searchParams.get("v");
+                        if (id) {
+                            return `https://www.youtube.com/embed/${id}`;
+                        }
+
+                        const segments = url.pathname.split("/").filter(Boolean);
+                        const embedIndex = segments.indexOf("embed");
+                        if (embedIndex >= 0 && segments.length > embedIndex + 1) {
+                            return `https://www.youtube.com/embed/${segments[embedIndex + 1]}`;
+                        }
+                    }
+
+                    if (url.hostname.includes("drive.google.com")) {
+                        const segments = url.pathname.split("/").filter(Boolean);
+                        const fileIndex = segments.indexOf("d");
+                        if (fileIndex >= 0 && segments.length > fileIndex + 1) {
+                            return `https://drive.google.com/file/d/${segments[fileIndex + 1]}/preview`;
+                        }
+                    }
+                } catch {
+                    return link;
+                }
+
+                return link;
+            };
+
+            const buildMusicEmbedLink = (link, muted) => {
+                const embed = buildEmbedLink(link);
+                if (!embed || !embed.includes("youtube.com/embed")) {
+                    return embed;
+                }
+
+                const id = embed.split("/").pop()?.split("?")[0];
+                const separator = embed.includes("?") ? "&" : "?";
+                const mutedValue = muted ? "1" : "0";
+                return `${embed}${separator}autoplay=1&mute=${mutedValue}&controls=0&loop=1&playlist=${id}&enablejsapi=1&playsinline=1`;
+            };
+
+            const getMusicType = (link) => {
+                if (!link) {
+                    return "";
+                }
+
+                try {
+                    const url = new URL(link);
+                    if (url.hostname.includes("youtube.com") || url.hostname.includes("youtu.be")) {
+                        return "youtube";
+                    }
+                } catch {
+                    return "audio";
+                }
+
+                return "audio";
+            };
+
             const updatePreview = () => {
-                const { preview, previewHeader, previewTitle, previewSubtitle, previewMessage, previewDate, previewVenue, previewMeta, previewAccent } = getPreviewElements();
+                const {
+                    preview,
+                    previewHeader,
+                    previewTitle,
+                    previewSubtitle,
+                    previewMessage,
+                    previewDate,
+                    previewVenue,
+                    previewMeta,
+                    previewAccent,
+                    previewPhone1,
+                    previewPhone2,
+                    previewVideo,
+                    previewAudio,
+                    previewVideoWrapper,
+                    previewAudioWrapper
+                } = getPreviewElements();
 
                 if (!preview || !previewTitle || !previewSubtitle || !previewMessage || !previewDate || !previewVenue || !previewMeta) {
                     return;
@@ -260,6 +453,58 @@
                 previewMessage.textContent = messageInput?.value.trim() || "";
                 previewDate.textContent = formatDateDisplay(dateInput?.value.trim());
                 previewVenue.textContent = venueInput?.value.trim() || "";
+
+                if (previewPhone1) {
+                    previewPhone1.textContent = person1PhoneInput?.value.trim() || "";
+                    previewPhone1.closest(".event-preview-contact")?.classList.toggle("is-empty", !previewPhone1.textContent);
+                }
+
+                if (previewPhone2) {
+                    previewPhone2.textContent = person2PhoneInput?.value.trim() || "";
+                    previewPhone2.closest(".event-preview-contact")?.classList.toggle("is-empty", !previewPhone2.textContent);
+                }
+
+                const videoValue = videoLinkInput?.value.trim() || "";
+                const musicValue = musicLinkInput?.value.trim() || "";
+
+                const videoEmbed = buildEmbedLink(videoValue);
+                const musicEmbedMuted = buildMusicEmbedLink(musicValue, true);
+                const musicEmbedUnmuted = buildMusicEmbedLink(musicValue, false);
+                const musicType = getMusicType(musicValue);
+
+                if (previewVideoWrapper) {
+                    previewVideoWrapper.hidden = !videoEmbed;
+                }
+                if (previewAudioWrapper) {
+                    previewAudioWrapper.hidden = !musicValue;
+                }
+
+                if (previewVideo) {
+                    previewVideo.src = videoEmbed || "";
+                }
+                if (previewAudio) {
+                    if (musicType === "youtube") {
+                        previewAudio.src = musicEmbedMuted || "";
+                        previewAudio.dataset.audioMuted = musicEmbedMuted || "";
+                        previewAudio.dataset.audioUnmuted = musicEmbedUnmuted || "";
+                    } else {
+                        previewAudio.src = musicValue || "";
+                    }
+                }
+
+                const audioEmbed = previewAudioWrapper?.querySelector("[data-audio-embed]");
+                if (audioEmbed) {
+                    audioEmbed.hidden = musicType !== "youtube";
+                }
+
+                const audioIframe = previewAudioWrapper?.querySelector("iframe");
+                if (audioIframe) {
+                    audioIframe.dataset.src = audioIframe.getAttribute("src") ?? "";
+                }
+
+                if (previewAudio && musicType !== "youtube" && !musicValue) {
+                    previewAudio.pause();
+                }
 
                 if (previewAccent) {
                     previewAccent.style.color = accentState.value;
@@ -301,10 +546,11 @@
                 if (previewContainer) {
                     previewContainer.innerHTML = html;
                     updatePreview();
+                    updateAudioControls();
                 }
             };
 
-            [person1Input, person2Input, messageInput, dateInput, venueInput, fontInput, layoutInput].forEach((input) => {
+            [person1Input, person2Input, person1PhoneInput, person2PhoneInput, messageInput, dateInput, venueInput, videoLinkInput, musicLinkInput, fontInput, layoutInput].forEach((input) => {
                 if (!input) {
                     return;
                 }
@@ -694,6 +940,7 @@
 
             updatePersonFields();
             updatePreview();
+            updateAudioControls();
             updateMapLink(locationLink?.value ?? "");
 
             if (scheduleList && scheduleList.children.length === 0) {

@@ -30,6 +30,8 @@ namespace InviteStudio.Web.Pages.Events
 
         public IReadOnlyList<TemplateOption> TemplateOptions { get; private set; } = new List<TemplateOption>();
 
+        public IReadOnlyList<string> TemplateAssets { get; private set; } = Array.Empty<string>();
+
         public async Task<IActionResult> OnGetAsync(Guid id)
         {
             Event = await _dbContext.Events.AsNoTracking().FirstOrDefaultAsync(item => item.Id == id);
@@ -41,15 +43,20 @@ namespace InviteStudio.Web.Pages.Events
 
             TemplateOptions = BuildTemplateOptions(Event.EventType);
             TemplatePartialName = SelectTemplate(Event.EventType);
+            TemplateAssets = BuildTemplateAssets(TemplateOptions);
             TemplateModel = BuildTemplateModel(Event);
             Input = new DesignCardInputModel
             {
                 EventId = Event.Id,
                 Person1Name = Event.Person1Name,
                 Person2Name = Event.Person2Name,
+                Person1Phone = Event.Person1Phone,
+                Person2Phone = Event.Person2Phone,
                 EventDate = Event.EventDate,
                 Venue = Event.Venue,
-                VenueMapLink = Event.VenueMapLink
+                VenueMapLink = Event.VenueMapLink,
+                VideoLink = Event.VideoLink,
+                MusicLink = Event.MusicLink
             };
 
             return Page();
@@ -66,6 +73,7 @@ namespace InviteStudio.Web.Pages.Events
 
             TemplateOptions = BuildTemplateOptions(Event.EventType);
             TemplatePartialName = SelectTemplate(Event.EventType, template);
+            TemplateAssets = BuildTemplateAssets(TemplateOptions);
             TemplateModel = BuildTemplateModel(Event);
 
             return new PartialViewResult
@@ -90,9 +98,13 @@ namespace InviteStudio.Web.Pages.Events
 
             @event.Person1Name = Input.Person1Name?.Trim() ?? string.Empty;
             @event.Person2Name = Input.Person2Name?.Trim() ?? string.Empty;
+            @event.Person1Phone = Input.Person1Phone?.Trim() ?? string.Empty;
+            @event.Person2Phone = Input.Person2Phone?.Trim() ?? string.Empty;
             @event.EventDate = Input.EventDate == default ? @event.EventDate : Input.EventDate;
             @event.Venue = Input.Venue?.Trim() ?? string.Empty;
             @event.VenueMapLink = Input.VenueMapLink?.Trim() ?? string.Empty;
+            @event.VideoLink = Input.VideoLink?.Trim() ?? string.Empty;
+            @event.MusicLink = Input.MusicLink?.Trim() ?? string.Empty;
 
             await _dbContext.SaveChangesAsync();
 
@@ -149,6 +161,7 @@ namespace InviteStudio.Web.Pages.Events
             return eventType switch
             {
                 EventType.Wedding => "_WeddingCard",
+                EventType.Birthday => "_BirthdayCard",
                 _ => "_DefaultCard"
             };
         }
@@ -162,11 +175,37 @@ namespace InviteStudio.Web.Pages.Events
                     new("_WeddingCard", "Wedding - Modern"),
                     new("_WeddingClassicCard", "Wedding - Classic")
                 },
+                EventType.Birthday => new List<TemplateOption>
+                {
+                    new("_BirthdayCard", "Birthday - Party")
+                },
                 _ => new List<TemplateOption>
                 {
                     new("_DefaultCard", "Default")
                 }
             };
+        }
+
+        public static string GetTemplateAssetKey(string templatePartialName)
+        {
+            return templatePartialName switch
+            {
+                "_WeddingCard" => "wedding-modern",
+                "_WeddingClassicCard" => "wedding-classic",
+                "_BirthdayCard" => "birthday-party",
+                _ => "default"
+            };
+        }
+
+        private static IReadOnlyList<string> BuildTemplateAssets(IReadOnlyList<TemplateOption> templateOptions)
+        {
+            var assets = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var option in templateOptions)
+            {
+                assets.Add(GetTemplateAssetKey(option.Value));
+            }
+
+            return assets.ToList();
         }
 
         private static InvitationTemplateModel BuildTemplateModel(Event @event)
@@ -182,12 +221,114 @@ namespace InviteStudio.Web.Pages.Events
                 DateText = @event.EventDate.ToString("MMMM dd, yyyy"),
                 Venue = @event.Venue,
                 VenueMapLink = @event.VenueMapLink,
+                Person1Phone = @event.Person1Phone,
+                Person2Phone = @event.Person2Phone,
+                VideoLink = @event.VideoLink,
+                MusicLink = @event.MusicLink,
+                VideoEmbedLink = BuildEmbedLink(@event.VideoLink),
+                MusicEmbedLinkMuted = BuildMusicEmbedLink(@event.MusicLink, true),
+                MusicEmbedLink = BuildMusicEmbedLink(@event.MusicLink, false),
+                MusicEmbedType = GetMusicEmbedType(@event.MusicLink),
                 AccentColor = "#1f8cff",
                 BackgroundColor = "#ffffff",
                 FontFamily = "'Segoe UI', sans-serif",
                 FooterLeft = "RSVP by April 10",
                 FooterRight = "invites.invite.studio"
             };
+        }
+
+        public static string BuildEmbedLink(string? link)
+        {
+            if (string.IsNullOrWhiteSpace(link))
+            {
+                return string.Empty;
+            }
+
+            if (Uri.TryCreate(link, UriKind.Absolute, out var uri))
+            {
+                if (uri.Host.Contains("youtube.com", StringComparison.OrdinalIgnoreCase) ||
+                    uri.Host.Contains("youtu.be", StringComparison.OrdinalIgnoreCase))
+                {
+                    var id = ExtractYouTubeId(uri);
+                    return string.IsNullOrWhiteSpace(id) ? link : $"https://www.youtube.com/embed/{id}";
+                }
+
+                if (uri.Host.Contains("drive.google.com", StringComparison.OrdinalIgnoreCase))
+                {
+                    var id = ExtractDriveId(uri);
+                    return string.IsNullOrWhiteSpace(id) ? link : $"https://drive.google.com/file/d/{id}/preview";
+                }
+            }
+
+            return link;
+        }
+
+        public static string BuildMusicEmbedLink(string? link, bool muted)
+        {
+            var embed = BuildEmbedLink(link);
+            if (string.IsNullOrWhiteSpace(embed) || !embed.Contains("youtube.com/embed", StringComparison.OrdinalIgnoreCase))
+            {
+                return embed;
+            }
+
+            var separator = embed.Contains("?") ? "&" : "?";
+            var mutedValue = muted ? "1" : "0";
+            return $"{embed}{separator}autoplay=1&mute={mutedValue}&controls=0&loop=1&playlist={ExtractYouTubeId(new Uri(embed))}&enablejsapi=1&playsinline=1";
+        }
+
+        public static string GetMusicEmbedType(string? link)
+        {
+            if (string.IsNullOrWhiteSpace(link))
+            {
+                return string.Empty;
+            }
+
+            if (Uri.TryCreate(link, UriKind.Absolute, out var uri))
+            {
+                if (uri.Host.Contains("youtube.com", StringComparison.OrdinalIgnoreCase) ||
+                    uri.Host.Contains("youtu.be", StringComparison.OrdinalIgnoreCase))
+                {
+                    return "youtube";
+                }
+            }
+
+            return "audio";
+        }
+
+        private static string? ExtractYouTubeId(Uri uri)
+        {
+            if (uri.Host.Contains("youtu.be", StringComparison.OrdinalIgnoreCase))
+            {
+                return uri.AbsolutePath.Trim('/');
+            }
+
+            var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+            var id = query.Get("v");
+            if (!string.IsNullOrWhiteSpace(id))
+            {
+                return id;
+            }
+
+            var segments = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            var embedIndex = Array.IndexOf(segments, "embed");
+            if (embedIndex >= 0 && segments.Length > embedIndex + 1)
+            {
+                return segments[embedIndex + 1];
+            }
+
+            return null;
+        }
+
+        private static string? ExtractDriveId(Uri uri)
+        {
+            var segments = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            var fileIndex = Array.IndexOf(segments, "d");
+            if (fileIndex >= 0 && segments.Length > fileIndex + 1)
+            {
+                return segments[fileIndex + 1];
+            }
+
+            return null;
         }
     }
 
@@ -207,6 +348,14 @@ namespace InviteStudio.Web.Pages.Events
         public string FontFamily { get; set; } = "'Segoe UI', sans-serif";
         public string FooterLeft { get; set; } = string.Empty;
         public string FooterRight { get; set; } = string.Empty;
+        public string Person1Phone { get; set; } = string.Empty;
+        public string Person2Phone { get; set; } = string.Empty;
+        public string VideoLink { get; set; } = string.Empty;
+        public string MusicLink { get; set; } = string.Empty;
+        public string VideoEmbedLink { get; set; } = string.Empty;
+        public string MusicEmbedLinkMuted { get; set; } = string.Empty;
+        public string MusicEmbedLink { get; set; } = string.Empty;
+        public string MusicEmbedType { get; set; } = string.Empty;
     }
 
     public record TemplateOption(string Value, string Label);
@@ -216,8 +365,12 @@ namespace InviteStudio.Web.Pages.Events
         public Guid EventId { get; set; }
         public string Person1Name { get; set; } = string.Empty;
         public string Person2Name { get; set; } = string.Empty;
+        public string Person1Phone { get; set; } = string.Empty;
+        public string Person2Phone { get; set; } = string.Empty;
         public DateTime EventDate { get; set; }
         public string Venue { get; set; } = string.Empty;
         public string VenueMapLink { get; set; } = string.Empty;
+        public string VideoLink { get; set; } = string.Empty;
+        public string MusicLink { get; set; } = string.Empty;
     }
 }

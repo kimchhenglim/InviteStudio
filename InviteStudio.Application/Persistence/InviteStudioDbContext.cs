@@ -30,9 +30,13 @@ public class InviteStudioDbContext : DbContext
             entity.Property(@event => @event.EventType).HasConversion<string>().HasMaxLength(100).IsRequired();
             entity.Property(@event => @event.Person1Name).HasMaxLength(200).IsRequired();
             entity.Property(@event => @event.Person2Name).HasMaxLength(200).IsRequired();
+            entity.Property(@event => @event.Person1Phone).HasMaxLength(40);
+            entity.Property(@event => @event.Person2Phone).HasMaxLength(40);
             entity.Property(@event => @event.EventDate).IsRequired();
             entity.Property(@event => @event.Venue).HasMaxLength(250).IsRequired();
             entity.Property(@event => @event.VenueMapLink).HasMaxLength(500);
+            entity.Property(@event => @event.VideoLink).HasMaxLength(500);
+            entity.Property(@event => @event.MusicLink).HasMaxLength(500);
         });
     }
 }

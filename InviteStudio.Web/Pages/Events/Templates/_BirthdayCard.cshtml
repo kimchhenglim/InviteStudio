@@ -1,8 +1,9 @@
 @model InviteStudio.Web.Pages.Events.InvitationTemplateModel
 
-<div class="event-preview-shell invite-template" id="invitePreview" style="background: @Model.BackgroundColor; font-family: @Model.FontFamily;">
+<div class="event-preview-shell invite-template invite-template-birthday" id="invitePreview" style="background: @Model.BackgroundColor; font-family: @Model.FontFamily;">
+    <div class="birthday-balloons" aria-hidden="true"></div>
     <div class="event-preview-header" id="previewHeader" style="color: @Model.AccentColor;">
-        <span class="event-preview-eyebrow">You're invited</span>
+        <span class="event-preview-eyebrow">Birthday celebration</span>
         <h3 id="previewTitle">@Model.Title</h3>
         <p id="previewSubtitle">@Model.Subtitle</p>
     </div>
@@ -51,6 +52,7 @@
             <audio id="previewAudio" src="@Model.MusicLink" loop autoplay data-audio-autoplay="true"></audio>
         }
     </div>
+    <img class="birthday-cake-image" src="~/images/templates/birthday-cake.svg" alt="" aria-hidden="true" />
     <div class="event-preview-footer">
         <span>@Model.FooterLeft</span>
         <span id="previewAccent" style="color: @Model.AccentColor;">@Model.FooterRight</span>

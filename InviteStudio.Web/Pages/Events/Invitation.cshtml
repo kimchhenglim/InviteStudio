@@ -9,3 +9,11 @@
         <partial name="~/Pages/Events/Templates/@(Model.TemplatePartialName).cshtml" model="Model.TemplateModel" />
     </div>
 </div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/templates/@(Model.TemplateAssetKey).css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script src="~/js/templates/@(Model.TemplateAssetKey).js" asp-append-version="true"></script>
+}

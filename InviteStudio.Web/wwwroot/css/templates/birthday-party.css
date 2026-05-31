@@ -1,0 +1,72 @@
+.invite-template-birthday {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(31, 140, 255, 0.15);
+  box-shadow: 0 20px 45px rgba(15, 40, 76, 0.12);
+}
+
+.invite-template-birthday .event-preview-meta {
+  border-radius: 18px;
+  border: 1px dashed rgba(31, 140, 255, 0.3);
+}
+
+.birthday-balloons {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.invite-template-birthday .event-preview-header,
+.invite-template-birthday .event-preview-message,
+.invite-template-birthday .event-preview-meta,
+.invite-template-birthday .event-preview-footer,
+.invite-template-birthday .birthday-cake-image {
+  position: relative;
+  z-index: 1;
+}
+
+.birthday-balloon-fly {
+  position: absolute;
+  bottom: -20px;
+  width: var(--balloon-size, 28px);
+  height: calc(var(--balloon-size, 28px) * 1.3);
+  border-radius: 50% 50% 50% 50%;
+  background: var(--balloon-color, linear-gradient(135deg, #ff9a9e, #fad0c4));
+  animation: balloon-rise var(--balloon-duration, 7s) ease-in forwards;
+  opacity: var(--balloon-opacity, 0.8);
+  filter: drop-shadow(0 8px 16px rgba(255, 159, 192, 0.25));
+}
+
+.birthday-balloon-fly::after {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 26px;
+  background: rgba(91, 100, 120, 0.3);
+  bottom: -26px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.birthday-cake-image {
+  width: 130px;
+  margin: 0.5rem auto 0;
+  display: block;
+  filter: drop-shadow(0 10px 20px rgba(255, 159, 192, 0.3));
+}
+
+@keyframes balloon-rise {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  15% {
+    opacity: var(--balloon-opacity, 0.8);
+  }
+  100% {
+    transform: translate3d(0, -160%, 0);
+    opacity: 0;
+  }
+}

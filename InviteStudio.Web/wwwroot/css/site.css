@@ -680,6 +680,129 @@ a:hover {
   border: 1px dashed rgba(31, 140, 255, 0.2);
 }
 
+.event-preview-contacts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  align-items: center;
+  font-size: 0.95rem;
+}
+
+.event-preview-contact.is-empty {
+  display: none;
+}
+
+.event-preview-media,
+.event-preview-audio {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.event-preview-video {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(31, 140, 255, 0.15);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.event-preview-video iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.event-preview-audio-controls {
+  display: flex;
+  justify-content: center;
+}
+
+.event-audio-float {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+}
+
+.event-audio-toggle {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.event-audio-toggle.is-playing {
+  box-shadow: 0 0 0 6px rgba(31, 140, 255, 0.2);
+  animation: audio-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes audio-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 6px rgba(31, 140, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(31, 140, 255, 0.1);
+  }
+}
+
+.event-audio-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  position: relative;
+}
+
+.event-audio-toggle[data-audio-state="paused"] .event-audio-icon::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 1px;
+  border-style: solid;
+  border-width: 7px 0 7px 12px;
+  border-color: transparent transparent transparent currentColor;
+}
+
+.event-audio-toggle[data-audio-state="playing"] .event-audio-icon::before,
+.event-audio-toggle[data-audio-state="playing"] .event-audio-icon::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  width: 4px;
+  height: 14px;
+  background: currentColor;
+  border-radius: 2px;
+}
+
+.event-audio-toggle[data-audio-state="playing"] .event-audio-icon::before {
+  left: 2px;
+}
+
+.event-audio-toggle[data-audio-state="playing"] .event-audio-icon::after {
+  right: 2px;
+}
+
+.event-preview-music-embed {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.event-preview-music-embed iframe {
+  width: 0;
+  height: 0;
+  border: 0;
+}
+
 .event-preview-label {
   display: block;
   font-size: 0.7rem;
@@ -877,10 +1000,6 @@ a:hover {
 
 .invite-template {
   min-height: 420px;
-}
-
-.invite-template-wedding .event-preview-eyebrow {
-  color: #a785ff;
 }
 
 .invitation-page {
