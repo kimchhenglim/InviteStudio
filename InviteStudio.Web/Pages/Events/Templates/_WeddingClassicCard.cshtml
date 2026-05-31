@@ -18,6 +18,12 @@
             <span id="previewVenue">@Model.Venue</span>
         </div>
     </div>
+    @if (!string.IsNullOrWhiteSpace(Model.VenueMapLink))
+    {
+        <div class="event-preview-map-row">
+            <a class="event-preview-map-link" href="@Model.VenueMapLink" target="_blank" rel="noopener">Open map</a>
+        </div>
+    }
     <div class="event-preview-contacts">
         <div class="event-preview-contact @(string.IsNullOrWhiteSpace(Model.Person1Phone) ? "is-empty" : "")">
             <span class="event-preview-label">Mobile</span>
@@ -32,6 +38,33 @@
         <span class="event-preview-label">Video</span>
         <div class="event-preview-video">
             <iframe id="previewVideo" src="@Model.VideoEmbedLink" title="Event video" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+        </div>
+    </div>
+    <div class="event-preview-timeline" id="previewTimelineWrapper" @(Model.Timeline.Groups.Count == 0 ? "hidden" : "")>
+        <span class="event-preview-label">Timeline</span>
+        <div class="event-preview-timeline-list" id="previewTimeline">
+            @foreach (var group in Model.Timeline.Groups)
+            {
+                <div class="event-preview-timeline-group">
+                    @if (DateTime.TryParse(group.Date, out var parsedDate))
+                    {
+                        <span class="event-preview-timeline-date">@parsedDate.ToString("MMMM dd, yyyy")</span>
+                    }
+                    @foreach (var item in group.Items)
+                    {
+                        <div class="event-preview-timeline-item">
+                            @if (!string.IsNullOrWhiteSpace(item.Time))
+                            {
+                                <span class="event-preview-timeline-time">@item.Time</span>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(item.Title))
+                            {
+                                <span class="event-preview-timeline-title">@item.Title</span>
+                            }
+                        </div>
+                    }
+                </div>
+            }
         </div>
     </div>
     <div class="event-preview-audio" id="previewAudioWrapper" @(string.IsNullOrWhiteSpace(Model.MusicLink) ? "hidden" : "")>
@@ -51,9 +84,5 @@
         {
             <audio id="previewAudio" src="@Model.MusicLink" loop autoplay data-audio-autoplay="true"></audio>
         }
-    </div>
-    <div class="event-preview-footer">
-        <span>@Model.FooterLeft</span>
-        <span id="previewAccent" style="color: @Model.AccentColor;">@Model.FooterRight</span>
     </div>
 </div>

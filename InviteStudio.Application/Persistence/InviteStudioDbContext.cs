@@ -37,6 +37,7 @@ public class InviteStudioDbContext : DbContext
             entity.Property(@event => @event.VenueMapLink).HasMaxLength(500);
             entity.Property(@event => @event.VideoLink).HasMaxLength(500);
             entity.Property(@event => @event.MusicLink).HasMaxLength(500);
+            entity.Property(@event => @event.TimelineJson).HasColumnType("nvarchar(max)");
         });
     }
 }

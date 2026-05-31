@@ -54,6 +54,7 @@ namespace InviteStudio.Web.Pages.Events
 
         private static InvitationTemplateModel BuildTemplateModel(Event @event)
         {
+            var timeline = TimelineSchedule.FromJson(@event.TimelineJson);
             return new InvitationTemplateModel
             {
                 Title = DesignCardModel.BuildEventTitle(@event),
@@ -72,8 +73,9 @@ namespace InviteStudio.Web.Pages.Events
                 AccentColor = "#1f8cff",
                 BackgroundColor = "#ffffff",
                 FontFamily = "'Segoe UI', sans-serif",
-                FooterLeft = "RSVP by April 10",
-                FooterRight = "invites.invite.studio"
+                FooterLeft = string.Empty,
+                FooterRight = string.Empty,
+                Timeline = timeline
             };
         }
     }

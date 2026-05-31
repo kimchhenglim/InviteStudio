@@ -29,6 +29,7 @@
 
 <form method="post" id="designForm">
     <input type="hidden" asp-for="Input.EventId" />
+    <input type="hidden" asp-for="Input.TimelineJson" id="timelineJson" />
     <div class="container pb-5">
         <div class="row g-4">
         <div class="col-12 col-lg-7">
@@ -47,14 +48,6 @@
                     <div id="personField2">
                         <label class="form-label" id="person2Label" for="cardPerson2">Person 2 name</label>
                         <input class="form-control" id="cardPerson2" asp-for="Input.Person2Name" value="@previewModel.Person2Name" />
-                    </div>
-                    <div>
-                        <label class="form-label" for="cardPerson1Phone">Person 1 mobile</label>
-                        <input class="form-control" id="cardPerson1Phone" asp-for="Input.Person1Phone" value="@previewModel.Person1Phone" />
-                    </div>
-                    <div>
-                        <label class="form-label" for="cardPerson2Phone">Person 2 mobile</label>
-                        <input class="form-control" id="cardPerson2Phone" asp-for="Input.Person2Phone" value="@previewModel.Person2Phone" />
                     </div>
                     <div>
                         <label class="form-label" for="cardMessage">Message</label>
@@ -84,13 +77,21 @@
                 <div class="event-detail-section">
                     <div>
                         <span class="event-detail-label">Location</span>
-                        <h2>Venue map</h2>
+                        <h2>Venue and contact numbers</h2>
                     </div>
                 </div>
                 <div class="event-design-grid">
                     <div>
                         <label class="form-label" for="cardVenue">Venue</label>
                         <input class="form-control" id="cardVenue" asp-for="Input.Venue" value="@previewModel.Venue" />
+                    </div>
+                    <div>
+                        <label class="form-label" for="cardPerson1Phone">Phone number 1</label>
+                        <input class="form-control" id="cardPerson1Phone" asp-for="Input.Person1Phone" value="@previewModel.Person1Phone" />
+                    </div>
+                    <div>
+                        <label class="form-label" for="cardPerson2Phone">Phone number 2</label>
+                        <input class="form-control" id="cardPerson2Phone" asp-for="Input.Person2Phone" value="@previewModel.Person2Phone" />
                     </div>
                     <div>
                         <label class="form-label" for="locationLink">Venue map link</label>
@@ -230,6 +231,9 @@
             const layoutInput = document.getElementById("layoutStyle");
             const scheduleList = document.getElementById("scheduleList");
             const addScheduleDateButton = document.getElementById("addScheduleDate");
+            const timelineJsonInput = document.getElementById("timelineJson");
+            const initialTimelineJson = timelineJsonInput?.value ?? "";
+            let isHydratingTimeline = true;
             const locationLink = document.getElementById("locationLink");
             const locationOpenLink = document.getElementById("locationOpenLink");
             const mapElement = document.getElementById("eventMap");
@@ -250,7 +254,9 @@
                 previewVideo: document.getElementById("previewVideo"),
                 previewAudio: document.getElementById("previewAudio"),
                 previewVideoWrapper: document.getElementById("previewVideoWrapper"),
-                previewAudioWrapper: document.getElementById("previewAudioWrapper")
+                previewAudioWrapper: document.getElementById("previewAudioWrapper"),
+                previewTimelineWrapper: document.getElementById("previewTimelineWrapper"),
+                previewTimeline: document.getElementById("previewTimeline")
             });
 
             const buildPreviewTitle = () => {
@@ -425,6 +431,99 @@
                 return "audio";
             };
 
+            const updatePreviewTimeline = (previewTimeline, previewTimelineWrapper) => {
+                if (!previewTimeline || !previewTimelineWrapper || !scheduleList) {
+                    return;
+                }
+
+                previewTimeline.innerHTML = "";
+                const groups = [...scheduleList.querySelectorAll(".event-schedule-card")];
+                let hasItems = false;
+
+                groups.forEach((group) => {
+                    const dateInput = group.querySelector("input[type='date']");
+                    const items = [...group.querySelectorAll(".event-schedule-item")];
+                    const validItems = items
+                        .map((item) => {
+                            const timeValue = item.querySelector("input[type='time']")?.value.trim() ?? "";
+                            const titleValue = item.querySelector("input[type='text']")?.value.trim() ?? "";
+                            return { timeValue, titleValue };
+                        })
+                        .filter((item) => item.timeValue || item.titleValue);
+
+                    if (validItems.length === 0 && !(dateInput?.value.trim() ?? "")) {
+                        return;
+                    }
+
+                    hasItems = hasItems || validItems.length > 0;
+
+                    const groupElement = document.createElement("div");
+                    groupElement.className = "event-preview-timeline-group";
+
+                    if (dateInput?.value) {
+                        const dateLabel = document.createElement("span");
+                        dateLabel.className = "event-preview-timeline-date";
+                        dateLabel.textContent = formatDateDisplay(dateInput.value);
+                        groupElement.appendChild(dateLabel);
+                    }
+
+                    validItems.forEach((item) => {
+                        const row = document.createElement("div");
+                        row.className = "event-preview-timeline-item";
+
+                        if (item.timeValue) {
+                            const time = document.createElement("span");
+                            time.className = "event-preview-timeline-time";
+                            time.textContent = item.timeValue;
+                            row.appendChild(time);
+                        }
+
+                        if (item.titleValue) {
+                            const title = document.createElement("span");
+                            title.className = "event-preview-timeline-title";
+                            title.textContent = item.titleValue;
+                            row.appendChild(title);
+                        }
+
+                        groupElement.appendChild(row);
+                    });
+
+                    previewTimeline.appendChild(groupElement);
+                });
+
+                previewTimelineWrapper.hidden = !hasItems;
+                if (timelineJsonInput && !isHydratingTimeline) {
+                    timelineJsonInput.value = JSON.stringify(buildSchedulePayload());
+                }
+            };
+
+            const buildSchedulePayload = () => {
+                if (!scheduleList) {
+                    return [];
+                }
+
+                return [...scheduleList.querySelectorAll(".event-schedule-card")].map((group) => {
+                    const dateInput = group.querySelector("input[type='date']");
+                    const dateId = group.dataset.scheduleId || crypto.randomUUID();
+                    group.dataset.scheduleId = dateId;
+                    const items = [...group.querySelectorAll(".event-schedule-item")].map((item) => {
+                        const itemId = item.dataset.scheduleItemId || crypto.randomUUID();
+                        item.dataset.scheduleItemId = itemId;
+                        return {
+                            id: itemId,
+                            time: item.querySelector("input[type='time']")?.value ?? "",
+                            title: item.querySelector("input[type='text']")?.value ?? ""
+                        };
+                    });
+
+                    return {
+                        id: dateId,
+                        date: dateInput?.value ?? "",
+                        items
+                    };
+                });
+            };
+
             const updatePreview = () => {
                 const {
                     preview,
@@ -441,7 +540,9 @@
                     previewVideo,
                     previewAudio,
                     previewVideoWrapper,
-                    previewAudioWrapper
+                    previewAudioWrapper,
+                    previewTimelineWrapper,
+                    previewTimeline
                 } = getPreviewElements();
 
                 if (!preview || !previewTitle || !previewSubtitle || !previewMessage || !previewDate || !previewVenue || !previewMeta) {
@@ -530,6 +631,8 @@
                 if (previewMeta) {
                     previewMeta.style.justifyContent = layoutInput?.value === "split" ? "space-between" : "center";
                 }
+
+                updatePreviewTimeline(previewTimeline, previewTimelineWrapper);
             };
 
             const updateTemplate = async () => {
@@ -799,7 +902,7 @@
                 });
             };
 
-            const createScheduleItemRow = (list) => {
+            const createScheduleItemRow = (list, itemData) => {
                 if (!list) {
                     return;
                 }
@@ -821,8 +924,26 @@
                     </div>
                 `;
 
+                const timeInput = row.querySelector("input[type='time']");
+                const titleInput = row.querySelector("input[type='text']");
+                if (timeInput && itemData?.time) {
+                    timeInput.value = itemData.time;
+                }
+                if (titleInput && itemData?.title) {
+                    titleInput.value = itemData.title;
+                }
+                if (itemData?.id) {
+                    row.dataset.scheduleItemId = itemData.id;
+                }
+
                 row.querySelector("button")?.addEventListener("click", () => {
                     row.remove();
+                    updatePreview();
+                });
+
+                row.querySelectorAll("input").forEach((input) => {
+                    input.addEventListener("input", updatePreview);
+                    input.addEventListener("change", updatePreview);
                 });
 
                 setScheduleItemDraggable(row);
@@ -830,7 +951,7 @@
                 list.appendChild(row);
             };
 
-            const createScheduleGroup = () => {
+            const createScheduleGroup = (groupData) => {
                 if (!scheduleList) {
                     return;
                 }
@@ -850,16 +971,31 @@
                 `;
 
                 const itemList = group.querySelector(".event-schedule-items");
+                const dateInput = group.querySelector("input[type='date']");
+                if (groupData?.id) {
+                    group.dataset.scheduleId = groupData.id;
+                }
+                if (dateInput && groupData?.date) {
+                    dateInput.value = groupData.date;
+                }
+                if (dateInput) {
+                    dateInput.addEventListener("input", updatePreview);
+                    dateInput.addEventListener("change", updatePreview);
+                }
                 group.querySelector("[data-action='remove-date']")?.addEventListener("click", () => {
                     group.remove();
+                    updatePreview();
                 });
 
                 group.querySelector("[data-action='add-item']")?.addEventListener("click", () => {
                     createScheduleItemRow(itemList);
                 });
 
-                createScheduleItemRow(itemList);
                 scheduleList.appendChild(group);
+                if (groupData?.items?.length) {
+                    groupData.items.forEach((item) => createScheduleItemRow(itemList, item));
+                }
+                updatePreview();
             };
 
             if (addScheduleDateButton) {
@@ -943,9 +1079,22 @@
             updateAudioControls();
             updateMapLink(locationLink?.value ?? "");
 
-            if (scheduleList && scheduleList.children.length === 0) {
-                createScheduleGroup();
+            if (initialTimelineJson) {
+                try {
+                    const scheduleData = JSON.parse(initialTimelineJson);
+                    if (Array.isArray(scheduleData)) {
+                        scheduleData.forEach((group) => createScheduleGroup(group));
+                    }
+                } catch {
+                }
             }
+
+            isHydratingTimeline = false;
+            if (timelineJsonInput && !timelineJsonInput.value) {
+                timelineJsonInput.value = JSON.stringify(buildSchedulePayload());
+            }
+
+            updatePreview();
         })();
     </script>
 }

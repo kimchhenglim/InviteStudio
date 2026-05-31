@@ -17,4 +17,5 @@ public class Event : BaseEntity
     public string VenueMapLink { get; set; } = string.Empty;
     public string VideoLink { get; set; } = string.Empty;
     public string MusicLink { get; set; } = string.Empty;
+    public string TimelineJson { get; set; } = string.Empty;
 }

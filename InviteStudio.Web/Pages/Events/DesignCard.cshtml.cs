@@ -56,7 +56,8 @@ namespace InviteStudio.Web.Pages.Events
                 Venue = Event.Venue,
                 VenueMapLink = Event.VenueMapLink,
                 VideoLink = Event.VideoLink,
-                MusicLink = Event.MusicLink
+                MusicLink = Event.MusicLink,
+                TimelineJson = Event.TimelineJson
             };
 
             return Page();
@@ -105,6 +106,7 @@ namespace InviteStudio.Web.Pages.Events
             @event.VenueMapLink = Input.VenueMapLink?.Trim() ?? string.Empty;
             @event.VideoLink = Input.VideoLink?.Trim() ?? string.Empty;
             @event.MusicLink = Input.MusicLink?.Trim() ?? string.Empty;
+            @event.TimelineJson = Input.TimelineJson?.Trim() ?? string.Empty;
 
             await _dbContext.SaveChangesAsync();
 
@@ -210,6 +212,7 @@ namespace InviteStudio.Web.Pages.Events
 
         private static InvitationTemplateModel BuildTemplateModel(Event @event)
         {
+            var timeline = TimelineSchedule.FromJson(@event.TimelineJson);
             return new InvitationTemplateModel
             {
                 Person1Name = @event.Person1Name,
@@ -232,8 +235,9 @@ namespace InviteStudio.Web.Pages.Events
                 AccentColor = "#1f8cff",
                 BackgroundColor = "#ffffff",
                 FontFamily = "'Segoe UI', sans-serif",
-                FooterLeft = "RSVP by April 10",
-                FooterRight = "invites.invite.studio"
+                FooterLeft = string.Empty,
+                FooterRight = string.Empty,
+                Timeline = timeline
             };
         }
 
@@ -356,9 +360,47 @@ namespace InviteStudio.Web.Pages.Events
         public string MusicEmbedLinkMuted { get; set; } = string.Empty;
         public string MusicEmbedLink { get; set; } = string.Empty;
         public string MusicEmbedType { get; set; } = string.Empty;
+        public TimelineSchedule Timeline { get; set; } = new();
     }
 
     public record TemplateOption(string Value, string Label);
+
+    public class TimelineSchedule
+    {
+        public List<TimelineScheduleGroup> Groups { get; set; } = new();
+
+        public static TimelineSchedule FromJson(string? json)
+        {
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                return new TimelineSchedule();
+            }
+
+            try
+            {
+                var groups = System.Text.Json.JsonSerializer.Deserialize<List<TimelineScheduleGroup>>(json);
+                return new TimelineSchedule { Groups = groups ?? new List<TimelineScheduleGroup>() };
+            }
+            catch
+            {
+                return new TimelineSchedule();
+            }
+        }
+    }
+
+    public class TimelineScheduleGroup
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Date { get; set; } = string.Empty;
+        public List<TimelineScheduleItem> Items { get; set; } = new();
+    }
+
+    public class TimelineScheduleItem
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Time { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+    }
 
     public class DesignCardInputModel
     {
@@ -372,5 +414,6 @@ namespace InviteStudio.Web.Pages.Events
         public string VenueMapLink { get; set; } = string.Empty;
         public string VideoLink { get; set; } = string.Empty;
         public string MusicLink { get; set; } = string.Empty;
+        public string TimelineJson { get; set; } = string.Empty;
     }
 }
