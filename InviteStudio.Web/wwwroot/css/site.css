@@ -395,6 +395,11 @@ a:hover {
   padding: 0.55rem 1rem;
 }
 
+.btn-outline-primary.btn-action-shape {
+  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+}
+
 .btn-outline-primary:hover,
 .btn-outline-primary:focus {
   background: var(--studio-blue-500);
@@ -600,6 +605,12 @@ a:hover {
   font-weight: 500;
 }
 
+.event-detail-list li.event-detail-list-borderless {
+  border: none;
+  background: transparent;
+  padding: 0.25rem 1rem;
+}
+
 .event-detail-badge {
   background: var(--studio-blue-100);
   color: var(--studio-blue-600);
@@ -611,6 +622,21 @@ a:hover {
 
 .event-detail-note {
   background: linear-gradient(135deg, #fff, var(--studio-blue-50));
+}
+
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.btn-icon svg {
+  width: 18px;
+  height: 18px;
 }
 
 .event-design-grid {

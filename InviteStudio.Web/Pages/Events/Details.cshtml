@@ -9,7 +9,7 @@
         <nav class="event-detail-menu">
             <a class="event-detail-menu-link is-active" href="#">General</a>
             <a class="event-detail-menu-link" asp-page="/Events/DesignCard" asp-route-id="@Model.Event?.Id">Invitation design</a>
-            <a class="event-detail-menu-link" href="#">Guests</a>
+            <a class="event-detail-menu-link" asp-page="/Events/Guests" asp-route-id="@Model.Event?.Id">Guests</a>
         </nav>
         <div class="event-detail-header">
             <div>
@@ -18,7 +18,7 @@
                 <p class="event-detail-subtitle">@Model.EventSubtitle</p>
             </div>
             <div class="event-detail-actions">
-                <a class="btn btn-outline-primary" asp-page="/Home/Home">Back to home</a>
+                <a class="btn btn-outline-primary btn-action-shape" asp-page="/Home/Home">Back to home</a>
             </div>
         </div>
     </div>
@@ -56,13 +56,30 @@
                 <div class="event-detail-footer">
                     <div>
                         <span class="event-detail-label">Guests invited</span>
-                        <p class="event-detail-value">134</p>
+                        <p class="event-detail-value">@Model.TotalGuests</p>
+                    </div>
+                    <div>
+                        <span class="event-detail-label">Guest tags</span>
+                        <p class="event-detail-value">@Model.TotalTags</p>
                     </div>
                     <div>
                         <span class="event-detail-label">Status</span>
                         <p class="event-detail-value">Designing invites</p>
                     </div>
                 </div>
+                @if (Model.TagSummaries.Count > 0)
+                {
+                    <div class="event-detail-divider"></div>
+                    <div class="event-detail-grid">
+                        @foreach (var tagSummary in Model.TagSummaries)
+                        {
+                            <div>
+                                <span class="event-detail-label">@tagSummary.Tag</span>
+                                <p class="event-detail-value">@tagSummary.Count</p>
+                            </div>
+                        }
+                    </div>
+                }
             </section>
         </div>
         <div class="col-12 col-lg-4">

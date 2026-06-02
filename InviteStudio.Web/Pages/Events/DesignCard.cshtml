@@ -4,6 +4,7 @@
     ViewData["Title"] = "Design card";
     var previewModel = Model.TemplateModel;
     var selectedTemplate = Model.TemplatePartialName;
+    var inviteUrl = Url.Page("/Events/Invitation", null, new { id = Model.Event?.Id }, Request.Scheme, Request.Host.Value);
 }
 
 <div class="event-detail-hero">
@@ -11,7 +12,7 @@
         <nav class="event-detail-menu">
             <a class="event-detail-menu-link" asp-page="/Events/Details" asp-route-id="@Model.Event?.Id">General</a>
             <a class="event-detail-menu-link is-active" href="#">Invitation design</a>
-            <a class="event-detail-menu-link" href="#">Guests</a>
+            <a class="event-detail-menu-link" asp-page="/Events/Guests" asp-route-id="@Model.Event?.Id">Guests</a>
         </nav>
         <div class="event-detail-header">
             <div>
@@ -21,7 +22,25 @@
             </div>
             <div class="event-detail-actions">
                 <button class="btn btn-primary" type="submit" form="designForm">Save changes</button>
-                <a class="btn btn-outline-primary" asp-page="/Events/Details" asp-route-id="@Model.Event?.Id">Back to overview</a>
+                <a class="btn btn-outline-primary btn-action-shape" asp-page="/Home/Home">Back to home</a>
+                <button id="copyInviteLink" class="btn btn-outline-secondary" type="button" data-invite-url="@inviteUrl" aria-label="Copy invitation link">Copy invite link</button>
+                <script>
+                    (function(){
+                        const btn = document.getElementById('copyInviteLink');
+                        if(!btn) return;
+                        btn.addEventListener('click', async function(){
+                            const url = this.getAttribute('data-invite-url');
+                            try{
+                                await navigator.clipboard.writeText(url);
+                                const orig = this.innerText;
+                                this.innerText = 'Copied';
+                                setTimeout(()=> this.innerText = orig, 2000);
+                            }catch(e){
+                                alert('Failed to copy link');
+                            }
+                        });
+                    })();
+                </script>
             </div>
         </div>
     </div>

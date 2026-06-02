@@ -22,6 +22,12 @@ namespace InviteStudio.Web.Pages.Events
 
         public Event? Event { get; private set; }
 
+        public IReadOnlyList<TagSummary> TagSummaries { get; private set; } = Array.Empty<TagSummary>();
+
+        public int TotalGuests { get; private set; }
+
+        public int TotalTags => TagSummaries.Count;
+
         public string EventTitle => Event == null ? "Event details" : BuildEventTitle(Event);
 
         public string EventSubtitle => Event == null ? string.Empty : $"{FormatEventType(Event.EventType)} · {Event.EventDate:MMMM dd, yyyy}";
@@ -44,6 +50,23 @@ namespace InviteStudio.Web.Pages.Events
             {
                 return Page();
             }
+
+            var guestRows = await _dbContext.Guests
+                .AsNoTracking()
+                .Include(guest => guest.GuestTag)
+                .Select(guest => new
+                {
+                    Tag = guest.GuestTag.Name
+                })
+                .ToListAsync();
+
+            TotalGuests = guestRows.Count;
+            TagSummaries = guestRows
+                .GroupBy(guest => guest.Tag)
+                .Select(group => new TagSummary(group.Key, group.Count()))
+                .OrderByDescending(summary => summary.Count)
+                .ThenBy(summary => summary.Tag)
+                .ToList();
 
             return Page();
         }
@@ -104,5 +127,7 @@ namespace InviteStudio.Web.Pages.Events
 
             return new string(parts.ToArray());
         }
+
+        public record TagSummary(string Tag, int Count);
     }
 }
