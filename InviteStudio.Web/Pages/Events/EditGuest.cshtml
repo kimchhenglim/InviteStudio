@@ -9,7 +9,7 @@
         <nav class="event-detail-menu">
             <a class="event-detail-menu-link" asp-page="/Events/Details" asp-route-id="@Model.Event?.Id">General</a>
             <a class="event-detail-menu-link" asp-page="/Events/DesignCard" asp-route-id="@Model.Event?.Id">Invitation design</a>
-            <a class="event-detail-menu-link is-active" asp-page="/Events/Guests" asp-route-id="@Model.Event?.Id">Guests</a>
+            <a class="event-detail-menu-link is-active" asp-page="/Events/Guests" asp-route-id="@Model.Event?.Id" asp-route-searchTerm="@Model.SearchTerm">Guests</a>
         </nav>
         <div class="event-detail-header">
             <div>
@@ -18,7 +18,7 @@
                 <p class="event-detail-subtitle">@Model.EventSubtitle</p>
             </div>
             <div class="event-detail-actions">
-                <a class="btn btn-outline-primary" asp-page="/Events/Guests" asp-route-id="@Model.Event?.Id">Back to guests</a>
+                <a class="btn btn-outline-primary" asp-page="/Events/Guests" asp-route-id="@Model.Event?.Id" asp-route-searchTerm="@Model.SearchTerm">Back to guests</a>
             </div>
         </div>
     </div>
@@ -36,6 +36,7 @@
                 </div>
                 <form method="post">
                     <input type="hidden" asp-for="Input.GuestId" />
+                    <input type="hidden" asp-for="SearchTerm" />
                     <div class="event-design-grid">
                         <div>
                             <label class="form-label" asp-for="Input.Name">Guest name</label>
@@ -67,7 +68,7 @@
                         </div>
                         <div class="d-flex gap-2">
                             <button class="btn btn-primary" type="submit">Save changes</button>
-                            <a class="btn btn-outline-primary" asp-page="/Events/Guests" asp-route-id="@Model.Event?.Id">Cancel</a>
+                            <a class="btn btn-outline-primary" asp-page="/Events/Guests" asp-route-id="@Model.Event?.Id" asp-route-searchTerm="@Model.SearchTerm">Cancel</a>
                         </div>
                     </div>
                 </form>

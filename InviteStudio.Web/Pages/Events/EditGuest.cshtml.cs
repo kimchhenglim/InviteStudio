@@ -27,6 +27,9 @@ namespace InviteStudio.Web.Pages.Events
         [BindProperty]
         public EditGuestInputModel Input { get; set; } = new();
 
+        [BindProperty(SupportsGet = true)]
+        public string SearchTerm { get; set; } = string.Empty;
+
         public string EventTitle => Event == null ? "Edit guest" : BuildEventTitle(Event);
 
         public string EventSubtitle => Event == null ? string.Empty : $"{FormatEventType(Event.EventType)} · {Event.EventDate:MMMM dd, yyyy}";
@@ -41,7 +44,7 @@ namespace InviteStudio.Web.Pages.Events
             var guest = await _dbContext.Guests.AsNoTracking().FirstOrDefaultAsync(item => item.Id == guestId);
             if (guest == null)
             {
-                return RedirectToPage("/Events/Guests", new { id });
+                return RedirectToPage("/Events/Guests", new { id, searchTerm = SearchTerm });
             }
 
             Input = new EditGuestInputModel
@@ -66,13 +69,13 @@ namespace InviteStudio.Web.Pages.Events
 
             if (Input.GuestId == Guid.Empty)
             {
-                return RedirectToPage("/Events/Guests", new { id, pageNumber, pageSize });
+                return RedirectToPage("/Events/Guests", new { id, pageNumber, pageSize, searchTerm = SearchTerm });
             }
 
             var guest = await _dbContext.Guests.FirstOrDefaultAsync(item => item.Id == Input.GuestId);
             if (guest == null)
             {
-                return RedirectToPage("/Events/Guests", new { id, pageNumber, pageSize });
+                return RedirectToPage("/Events/Guests", new { id, pageNumber, pageSize, searchTerm = SearchTerm });
             }
 
             var name = Input.Name?.Trim() ?? string.Empty;
@@ -111,7 +114,7 @@ namespace InviteStudio.Web.Pages.Events
 
             await _dbContext.SaveChangesAsync();
 
-            return RedirectToPage("/Events/Guests", new { id, pageNumber, pageSize });
+            return RedirectToPage("/Events/Guests", new { id, pageNumber, pageSize, searchTerm = SearchTerm });
         }
 
         private async Task<bool> LoadPageDataAsync(Guid id)

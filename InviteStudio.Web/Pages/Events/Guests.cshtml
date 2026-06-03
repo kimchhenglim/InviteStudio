@@ -29,6 +29,19 @@
     <div class="row g-4">
         <div class="col-12">
             <section class="event-detail-card">
+                <div class="event-detail-toolbar">
+                    <form class="event-detail-search" method="get">
+                        <input type="hidden" name="id" value="@Model.Event?.Id" />
+                        <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                        <label class="visually-hidden" for="guestSearch">Search guests</label>
+                        <input class="form-control" id="guestSearch" name="searchTerm" type="search" value="@Model.SearchTerm" placeholder="Search by name, phone number, or tag" />
+                        <button class="btn btn-outline-primary btn-action-shape" type="submit">Search</button>
+                        @if (!string.IsNullOrWhiteSpace(Model.SearchTerm))
+                        {
+                            <a class="btn btn-outline-secondary btn-action-shape" asp-page="/Events/Guests" asp-route-id="@Model.Event?.Id" asp-route-pageSize="@Model.PageSize">Clear</a>
+                        }
+                    </form>
+                </div>
                 <form method="post">
                     <div class="event-detail-section">
                         <div>
@@ -45,12 +58,17 @@
                                 }
                             </select>
                             <input type="hidden" name="pageNumber" value="@Model.PageNumber" />
+                            <input type="hidden" name="searchTerm" value="@Model.SearchTerm" />
                             <button class="btn btn-outline-danger btn-sm" type="submit" asp-page-handler="BulkDelete">Delete selected</button>
                         </div>
                     </div>
                     @if (Model.Guests.Count == 0)
                     {
-                        <div class="alert alert-light">No guests added yet. Create your first guest to start tracking invites.</div>
+                        <div class="alert alert-light">
+                            @(string.IsNullOrWhiteSpace(Model.SearchTerm)
+                                ? "No guests added yet. Create your first guest to start tracking invites."
+                                : "No guests match that search.")
+                        </div>
                     }
                     else
                     {
@@ -73,13 +91,13 @@
                                         </div>
                                     </div>
                                     <div class="d-flex gap-2">
-                                        <a class="btn btn-outline-primary btn-sm btn-icon" asp-page="/Events/EditGuest" asp-route-id="@Model.Event?.Id" asp-route-guestId="@guest.Id" asp-route-pageNumber="@Model.PageNumber" asp-route-pageSize="@Model.PageSize" aria-label="Edit guest">
+                                        <a class="btn btn-outline-primary btn-sm btn-icon" asp-page="/Events/EditGuest" asp-route-id="@Model.Event?.Id" asp-route-guestId="@guest.Id" asp-route-pageNumber="@Model.PageNumber" asp-route-pageSize="@Model.PageSize" asp-route-searchTerm="@Model.SearchTerm" aria-label="Edit guest">
                                             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
                                                 <path d="M4 20h4l10.5-10.5a1.414 1.414 0 0 0 0-2L15.5 4.5a1.414 1.414 0 0 0-2 0L3 15v4a1 1 0 0 0 1 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
                                                 <path d="M13.5 6.5l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                                             </svg>
                                         </a>
-                                        <button class="btn btn-outline-danger btn-sm btn-icon" type="submit" asp-page-handler="Delete" asp-route-id="@Model.Event?.Id" asp-route-guestId="@guest.Id" asp-route-pageNumber="@Model.PageNumber" asp-route-pageSize="@Model.PageSize" aria-label="Delete guest">
+                                        <button class="btn btn-outline-danger btn-sm btn-icon" type="submit" asp-page-handler="Delete" asp-route-id="@Model.Event?.Id" asp-route-guestId="@guest.Id" asp-route-pageNumber="@Model.PageNumber" asp-route-pageSize="@Model.PageSize" asp-route-searchTerm="@Model.SearchTerm" aria-label="Delete guest">
                                             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
                                                 <path d="M4 7h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                                                 <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
@@ -96,19 +114,19 @@
                             <div class="d-flex gap-2">
                                 @if (Model.PageNumber <= 1)
                                 {
-                                    <span class="btn btn-outline-primary btn-sm disabled" aria-disabled="true">Previous</span>
+                                    <span class="btn btn-outline-primary btn-sm btn-action-shape disabled" aria-disabled="true">Previous</span>
                                 }
                                 else
                                 {
-                                    <a class="btn btn-outline-primary btn-sm" asp-page="/Events/Guests" asp-route-id="@Model.Event?.Id" asp-route-pageNumber="@Math.Max(1, Model.PageNumber - 1)" asp-route-pageSize="@Model.PageSize">Previous</a>
+                                    <a class="btn btn-outline-primary btn-sm btn-action-shape" asp-page="/Events/Guests" asp-route-id="@Model.Event?.Id" asp-route-pageNumber="@Math.Max(1, Model.PageNumber - 1)" asp-route-pageSize="@Model.PageSize" asp-route-searchTerm="@Model.SearchTerm">Previous</a>
                                 }
                                 @if (Model.PageNumber >= Model.TotalPages)
                                 {
-                                    <span class="btn btn-outline-primary btn-sm disabled" aria-disabled="true">Next</span>
+                                    <span class="btn btn-outline-primary btn-sm btn-action-shape disabled" aria-disabled="true">Next</span>
                                 }
                                 else
                                 {
-                                    <a class="btn btn-outline-primary btn-sm" asp-page="/Events/Guests" asp-route-id="@Model.Event?.Id" asp-route-pageNumber="@Math.Min(Model.TotalPages, Model.PageNumber + 1)" asp-route-pageSize="@Model.PageSize">Next</a>
+                                    <a class="btn btn-outline-primary btn-sm btn-action-shape" asp-page="/Events/Guests" asp-route-id="@Model.Event?.Id" asp-route-pageNumber="@Math.Min(Model.TotalPages, Model.PageNumber + 1)" asp-route-pageSize="@Model.PageSize" asp-route-searchTerm="@Model.SearchTerm">Next</a>
                                 }
                             </div>
                         </div>

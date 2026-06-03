@@ -32,6 +32,9 @@ namespace InviteStudio.Web.Pages.Events
         [BindProperty(SupportsGet = true)]
         public int PageSize { get; set; } = 20;
 
+        [BindProperty(SupportsGet = true)]
+        public string SearchTerm { get; set; } = string.Empty;
+
         public int TotalGuests { get; private set; }
 
         public int TotalPages => PageSize <= 0 ? 1 : Math.Max(1, (int)Math.Ceiling(TotalGuests / (double)PageSize));
@@ -67,7 +70,7 @@ namespace InviteStudio.Web.Pages.Events
                 return Page();
             }
 
-            return RedirectToPage("/Events/Guests", new { id, pageNumber = PageNumber, pageSize = PageSize });
+            return RedirectToPage("/Events/Guests", new { id, pageNumber = PageNumber, pageSize = PageSize, searchTerm = SearchTerm });
         }
 
         public async Task<IActionResult> OnPostDeleteAsync(Guid id, Guid guestId)
@@ -80,13 +83,13 @@ namespace InviteStudio.Web.Pages.Events
             var guest = await _dbContext.Guests.FirstOrDefaultAsync(item => item.Id == guestId);
             if (guest == null)
             {
-                return RedirectToPage("/Events/Guests", new { id });
+                return RedirectToPage("/Events/Guests", new { id, searchTerm = SearchTerm });
             }
 
             _dbContext.Guests.Remove(guest);
             await _dbContext.SaveChangesAsync();
 
-            return RedirectToPage("/Events/Guests", new { id, pageNumber = PageNumber, pageSize = PageSize });
+            return RedirectToPage("/Events/Guests", new { id, pageNumber = PageNumber, pageSize = PageSize, searchTerm = SearchTerm });
         }
 
         public async Task<IActionResult> OnPostBulkDeleteAsync(Guid id)
@@ -98,7 +101,7 @@ namespace InviteStudio.Web.Pages.Events
 
             if (SelectedGuestIds.Count == 0)
             {
-                return RedirectToPage("/Events/Guests", new { id, pageNumber = PageNumber, pageSize = PageSize });
+                return RedirectToPage("/Events/Guests", new { id, pageNumber = PageNumber, pageSize = PageSize, searchTerm = SearchTerm });
             }
 
             var guests = await _dbContext.Guests
@@ -107,13 +110,13 @@ namespace InviteStudio.Web.Pages.Events
 
             if (guests.Count == 0)
             {
-                return RedirectToPage("/Events/Guests", new { id, pageNumber = PageNumber, pageSize = PageSize });
+                return RedirectToPage("/Events/Guests", new { id, pageNumber = PageNumber, pageSize = PageSize, searchTerm = SearchTerm });
             }
 
             _dbContext.Guests.RemoveRange(guests);
             await _dbContext.SaveChangesAsync();
 
-            return RedirectToPage("/Events/Guests", new { id, pageNumber = PageNumber, pageSize = PageSize });
+            return RedirectToPage("/Events/Guests", new { id, pageNumber = PageNumber, pageSize = PageSize, searchTerm = SearchTerm });
         }
 
         private static string BuildEventTitle(Event @event)
@@ -172,7 +175,22 @@ namespace InviteStudio.Web.Pages.Events
 
             PageSize = NormalizePageSize(PageSize);
             PageNumber = Math.Max(1, PageNumber);
-            TotalGuests = await _dbContext.Guests.CountAsync();
+            SearchTerm = SearchTerm?.Trim() ?? string.Empty;
+
+            var guestsQuery = _dbContext.Guests
+                .AsNoTracking()
+                .Include(guest => guest.GuestTag)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(SearchTerm))
+            {
+                guestsQuery = guestsQuery.Where(guest =>
+                    EF.Functions.Like(guest.Name, $"%{SearchTerm}%") ||
+                    (guest.PhoneNumber != null && EF.Functions.Like(guest.PhoneNumber, $"%{SearchTerm}%")) ||
+                    EF.Functions.Like(guest.GuestTag.Name, $"%{SearchTerm}%"));
+            }
+
+            TotalGuests = await guestsQuery.CountAsync();
             var totalPages = TotalPages;
             if (PageNumber > totalPages)
             {
@@ -181,9 +199,7 @@ namespace InviteStudio.Web.Pages.Events
 
             var skip = (PageNumber - 1) * PageSize;
 
-            Guests = await _dbContext.Guests
-                .AsNoTracking()
-                .Include(guest => guest.GuestTag)
+            Guests = await guestsQuery
                 .OrderBy(guest => guest.Name)
                 .Skip(skip)
                 .Take(PageSize)
