@@ -11,48 +11,51 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    <header class="app-header">
-        <nav class="navbar navbar-expand-lg">
-            <div class="container">
-                <a class="navbar-brand app-brand" asp-area="" asp-page="/Home/Home">InviteStudio</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#appNavbar" aria-controls="appNavbar"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse" id="appNavbar">
-                    <ul class="navbar-nav ms-auto">
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <li class="nav-item dropdown">
-                                <button class="btn btn-profile dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <span class="profile-avatar">@User.Identity.Name?.Substring(0, 1)</span>
-                                    <span class="profile-name">@User.Identity.Name</span>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li class="dropdown-profile px-3">
-                                        <span class="dropdown-greeting">Hello, @User.Identity.Name</span>
-                                        <span class="dropdown-email">@User.FindFirstValue(ClaimTypes.Email)</span>
-                                    </li>
-                                    <li><hr class="dropdown-divider" /></li>
-                                    <li>
-                                        <form class="px-3" method="post" asp-page="/Account/Logout">
-                                            <button type="submit" class="btn btn-outline-primary w-100 btn-sm">Logout</button>
-                                        </form>
-                                    </li>
-                                </ul>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="btn btn-outline-primary btn-sm" asp-area="" asp-page="/Account/Login">Login</a>
-                            </li>
-                        }
-                    </ul>
+    @if (!(ViewData["HideHeader"] as bool? ?? false))
+    {
+        <header class="app-header">
+            <nav class="navbar navbar-expand-lg">
+                <div class="container">
+                    <a class="navbar-brand app-brand" asp-area="" asp-page="/Home/Home">InviteStudio</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#appNavbar" aria-controls="appNavbar"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="navbar-collapse collapse" id="appNavbar">
+                        <ul class="navbar-nav ms-auto">
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <li class="nav-item dropdown">
+                                    <button class="btn btn-profile dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="profile-avatar">@User.Identity.Name?.Substring(0, 1)</span>
+                                        <span class="profile-name">@User.Identity.Name</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li class="dropdown-profile px-3">
+                                            <span class="dropdown-greeting">Hello, @User.Identity.Name</span>
+                                            <span class="dropdown-email">@User.FindFirstValue(ClaimTypes.Email)</span>
+                                        </li>
+                                        <li><hr class="dropdown-divider" /></li>
+                                        <li>
+                                            <form class="px-3" method="post" asp-page="/Account/Logout">
+                                                <button type="submit" class="btn btn-outline-primary w-100 btn-sm">Logout</button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="btn btn-outline-primary btn-sm" asp-area="" asp-page="/Account/Login">Login</a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
                 </div>
-            </div>
-        </nav>
-    </header>
+            </nav>
+        </header>
+    }
     <main role="main" class="pb-3">
         @RenderBody()
     </main>

@@ -367,6 +367,11 @@ namespace InviteStudio.Web.Pages.Events
 
     public class TimelineSchedule
     {
+        private static readonly System.Text.Json.JsonSerializerOptions JsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
+
         public List<TimelineScheduleGroup> Groups { get; set; } = new();
 
         public static TimelineSchedule FromJson(string? json)
@@ -378,7 +383,7 @@ namespace InviteStudio.Web.Pages.Events
 
             try
             {
-                var groups = System.Text.Json.JsonSerializer.Deserialize<List<TimelineScheduleGroup>>(json);
+                var groups = System.Text.Json.JsonSerializer.Deserialize<List<TimelineScheduleGroup>>(json, JsonOptions);
                 return new TimelineSchedule { Groups = groups ?? new List<TimelineScheduleGroup>() };
             }
             catch

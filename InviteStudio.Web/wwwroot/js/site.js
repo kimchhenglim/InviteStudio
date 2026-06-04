@@ -2,6 +2,8 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 (() => {
+  let audioToggleClickBound = false;
+
   const updateButtonState = (button, isPlaying) => {
     button.dataset.audioState = isPlaying ? "playing" : "paused";
     button.setAttribute("aria-label", isPlaying ? "Pause music" : "Play music");
@@ -25,6 +27,21 @@
     iframe.dataset.audioMuted = muted;
     iframe.dataset.audioUnmuted = unmuted;
     return { muted, unmuted };
+  };
+
+  const ensureYouTubePlayback = (iframe) => {
+    if (!iframe) {
+      return;
+    }
+
+    const commands = () => {
+      sendYouTubeCommand(iframe, "playVideo");
+      window.setTimeout(() => sendYouTubeCommand(iframe, "unMute"), 150);
+      window.setTimeout(() => sendYouTubeCommand(iframe, "playVideo"), 300);
+    };
+
+    window.setTimeout(commands, 250);
+    window.setTimeout(commands, 800);
   };
 
   const syncAudioButton = (button) => {
@@ -52,6 +69,13 @@
     }
 
     if (iframe) {
+      if (!iframe.dataset.audioBound) {
+        iframe.dataset.audioBound = "true";
+        iframe.addEventListener("load", () => {
+          iframe.dataset.audioLoaded = "true";
+        });
+      }
+
       const { unmuted } = getIframeSources(iframe);
       const current = iframe.getAttribute("src") || "";
       updateButtonState(button, current !== "" && current === unmuted);
@@ -60,11 +84,66 @@
     }
   };
 
+  const triggerAudioButton = (button) => {
+    const wrapper = button.closest(".event-preview-audio");
+    const audio = wrapper?.querySelector("audio");
+    const iframe = wrapper?.querySelector("iframe");
+    if (audio) {
+      if (audio.paused) {
+        audio.play().then(() => {
+          updateButtonState(button, true);
+        }).catch(() => {
+          updateButtonState(button, false);
+        });
+      } else {
+        updateButtonState(button, true);
+      }
+      return;
+    }
+
+    if (iframe) {
+      const startPlayback = () => {
+        ensureYouTubePlayback(iframe);
+        updateButtonState(button, true);
+      };
+      const { muted } = getIframeSources(iframe);
+      const currentSource = iframe.getAttribute("src") || "";
+
+      if (iframe.dataset.audioLoaded === "true") {
+        if (currentSource !== muted) {
+          iframe.addEventListener("load", startPlayback, { once: true });
+          iframe.setAttribute("src", muted || "");
+        } else {
+          startPlayback();
+        }
+        return;
+      }
+
+      iframe.addEventListener("load", startPlayback, { once: true });
+      if (currentSource !== muted) {
+        iframe.setAttribute("src", muted || "");
+      }
+      updateButtonState(button, true);
+      return;
+    }
+  };
+
   const initAudioToggles = () => {
     document.querySelectorAll("[data-audio-toggle]").forEach((button) => {
       syncAudioButton(button);
+      if (button.closest(".invitation-page") && !button.dataset.audioAutoTriggered) {
+        button.dataset.audioAutoTriggered = "true";
+        window.setTimeout(() => {
+          triggerAudioButton(button);
+        }, 400);
+      }
     });
 
+    if (audioToggleClickBound) {
+      return;
+    }
+
+    audioToggleClickBound = true;
     document.addEventListener("click", (event) => {
       const target = event.target instanceof Element ? event.target.closest("[data-audio-toggle]") : null;
       if (!target) {
@@ -87,14 +166,13 @@
       }
 
       if (iframe) {
-        const { muted, unmuted } = getIframeSources(iframe);
+        const { muted } = getIframeSources(iframe);
         const isPlaying = target.dataset.audioState === "playing";
         if (isPlaying) {
           iframe.setAttribute("src", muted || "");
           updateButtonState(target, false);
         } else {
-          iframe.setAttribute("src", unmuted || muted || "");
-          updateButtonState(target, true);
+          triggerAudioButton(target);
         }
       }
     });
@@ -105,4 +183,6 @@
   } else {
     initAudioToggles();
   }
+
+  window.addEventListener("load", initAudioToggles);
 })();

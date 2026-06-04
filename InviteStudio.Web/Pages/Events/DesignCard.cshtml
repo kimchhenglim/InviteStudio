@@ -96,14 +96,10 @@
                 <div class="event-detail-section">
                     <div>
                         <span class="event-detail-label">Location</span>
-                        <h2>Venue and contact numbers</h2>
+                        <h2>Venue and Contact</h2>
                     </div>
                 </div>
                 <div class="event-design-grid">
-                    <div>
-                        <label class="form-label" for="cardVenue">Venue</label>
-                        <input class="form-control" id="cardVenue" asp-for="Input.Venue" value="@previewModel.Venue" />
-                    </div>
                     <div>
                         <label class="form-label" for="cardPerson1Phone">Phone number 1</label>
                         <input class="form-control" id="cardPerson1Phone" asp-for="Input.Person1Phone" value="@previewModel.Person1Phone" />
@@ -112,6 +108,10 @@
                         <label class="form-label" for="cardPerson2Phone">Phone number 2</label>
                         <input class="form-control" id="cardPerson2Phone" asp-for="Input.Person2Phone" value="@previewModel.Person2Phone" />
                     </div>
+                        <div>
+                            <label class="form-label" for="cardVenue">Venue</label>
+                            <input class="form-control" id="cardVenue" asp-for="Input.Venue" value="@previewModel.Venue" />
+                        </div>
                     <div>
                         <label class="form-label" for="locationLink">Venue map link</label>
                         <input class="form-control" id="locationLink" asp-for="Input.VenueMapLink" value="@previewModel.VenueMapLink" readonly />
