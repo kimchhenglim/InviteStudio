@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using InviteStudio.Application.Entities;
 using InviteStudio.Application.Enums;
@@ -35,48 +36,29 @@ namespace InviteStudio.Web.Pages.Events
                 return Page();
             }
 
-            TemplatePartialName = SelectTemplate(Event.EventType);
+            TemplatePartialName = SelectTemplate(Event.EventType, Event.TemplateName);
             TemplateAssetKey = DesignCardModel.GetTemplateAssetKey(TemplatePartialName);
-            TemplateModel = BuildTemplateModel(Event);
+            TemplateModel = DesignCardModel.BuildTemplateModel(Event);
 
             return Page();
         }
 
-        private static string SelectTemplate(EventType eventType)
+        private static string SelectTemplate(EventType eventType, string? template = null)
         {
-            return eventType switch
+            var options = eventType switch
             {
-                EventType.Wedding => "_WeddingCard",
-                EventType.Birthday => "_BirthdayCard",
-                _ => "_DefaultCard"
+                EventType.Wedding => new[] { "_WeddingCard", "_WeddingClassicCard" },
+                EventType.Birthday => new[] { "_BirthdayCard" },
+                _ => new[] { "_DefaultCard" }
             };
-        }
 
-        private static InvitationTemplateModel BuildTemplateModel(Event @event)
-        {
-            var timeline = TimelineSchedule.FromJson(@event.TimelineJson);
-            return new InvitationTemplateModel
+            var normalized = template?.Trim();
+            if (!string.IsNullOrWhiteSpace(normalized) && options.Contains(normalized))
             {
-                Title = DesignCardModel.BuildEventTitle(@event),
-                Subtitle = $"{DesignCardModel.FormatEventType(@event.EventType)} · {@event.EventDate:MMMM dd, yyyy}",
-                Message = "We would love to celebrate with you. Please join us for our special day.",
-                DateText = @event.EventDate.ToString("MMMM dd, yyyy"),
-                Venue = @event.Venue,
-                Person1Phone = @event.Person1Phone,
-                Person2Phone = @event.Person2Phone,
-                VideoLink = @event.VideoLink,
-                MusicLink = @event.MusicLink,
-                VideoEmbedLink = DesignCardModel.BuildEmbedLink(@event.VideoLink),
-                MusicEmbedLinkMuted = DesignCardModel.BuildMusicEmbedLink(@event.MusicLink, true),
-                MusicEmbedLink = DesignCardModel.BuildMusicEmbedLink(@event.MusicLink, false),
-                MusicEmbedType = DesignCardModel.GetMusicEmbedType(@event.MusicLink),
-                AccentColor = "#1f8cff",
-                BackgroundColor = "#ffffff",
-                FontFamily = "'Segoe UI', sans-serif",
-                FooterLeft = string.Empty,
-                FooterRight = string.Empty,
-                Timeline = timeline
-            };
+                return normalized;
+            }
+
+            return options[0];
         }
     }
 }

@@ -1,2 +1,208 @@
-﻿@page "/"
+@page "/"
 @model IndexModel
+@{
+    ViewData["Title"] = "Beautiful invitations without the spreadsheet chaos";
+}
+
+<section class="landing-hero">
+    <div class="container">
+        <div class="landing-hero-grid">
+            <div class="landing-copy">
+                <span class="landing-eyebrow">InviteStudio</span>
+                <div class="landing-audience">
+                    <span>Weddings</span>
+                    <span>Birthdays</span>
+                    <span>Private events</span>
+                </div>
+                <h1>Turn event planning into a polished invitation experience.</h1>
+                <p class="landing-lead">
+                    InviteStudio gives you one workspace for the invitation page, guest list, event schedule, and
+                    contact details, so guests get a cleaner experience and you get less planning noise.
+                </p>
+                <div class="landing-actions">
+                    <a class="btn btn-primary btn-lg" asp-page="/Account/Login">Start free</a>
+                    <a class="btn btn-outline-primary btn-lg" asp-page="/Account/Login" asp-page-handler="">Sign in</a>
+                </div>
+                <div class="landing-stat-row">
+                    <div class="landing-stat">
+                        <strong>1 page</strong>
+                        <span>for guests instead of scattered messages</span>
+                    </div>
+                    <div class="landing-stat">
+                        <strong>4 core tools</strong>
+                        <span>event setup, design, guest list, timeline</span>
+                    </div>
+                    <div class="landing-stat">
+                        <strong>Built to publish</strong>
+                        <span>not just draft pretty mockups</span>
+                    </div>
+                </div>
+                <div class="landing-proof">
+                    <div class="landing-proof-item">
+                        <strong>Event pages</strong>
+                        <span>Flexible invitation layouts for weddings, birthdays, and custom events</span>
+                    </div>
+                    <div class="landing-proof-item">
+                        <strong>Guest tools</strong>
+                        <span>Import guests, edit details, and keep your planning list under control</span>
+                    </div>
+                    <div class="landing-proof-item">
+                        <strong>Schedule control</strong>
+                        <span>Shape the timeline and publish a page people can actually follow</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="landing-showcase">
+                <div class="landing-showcase-card landing-showcase-console">
+                    <div class="landing-console-topbar">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <div class="landing-showcase-label">Event workspace preview</div>
+                    <div class="landing-console-grid">
+                        <article class="landing-console-panel landing-console-panel-primary">
+                            <span class="landing-mini-kicker">Current event</span>
+                            <h2>Harper &amp; Jae Celebration</h2>
+                            <p>Saturday, November 14 at Glasshouse Hall</p>
+                            <div class="landing-console-tags">
+                                <span>Invitation page ready</span>
+                                <span>Guest import complete</span>
+                                <span>Timeline in review</span>
+                            </div>
+                        </article>
+                        <article class="landing-console-panel">
+                            <span class="landing-mini-kicker">Guest list</span>
+                            <ul class="landing-console-list">
+                                <li><span>Guests imported</span><strong>128</strong></li>
+                                <li><span>Households tagged</span><strong>42</strong></li>
+                                <li><span>Manual edits today</span><strong>11</strong></li>
+                            </ul>
+                        </article>
+                        <article class="landing-console-panel">
+                            <span class="landing-mini-kicker">Timeline</span>
+                            <ul class="landing-timeline-list">
+                                <li><strong>3:30 PM</strong><span>Ceremony begins</span></li>
+                                <li><strong>5:00 PM</strong><span>Garden reception</span></li>
+                                <li><strong>7:30 PM</strong><span>Dinner and speeches</span></li>
+                            </ul>
+                        </article>
+                        <article class="landing-console-panel landing-showcase-brand">
+                            <img src="~/asset/LogoTop_TextBottom.png" alt="InviteStudio logo" />
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="landing-section">
+    <div class="container">
+        <div class="landing-section-heading">
+            <span class="landing-section-kicker">What it covers</span>
+            <h2>Built for the operational side of invitations as much as the visual side.</h2>
+        </div>
+
+        <div class="landing-feature-grid">
+            <article class="landing-feature-card">
+                <h3>Event setup</h3>
+                <p>Create events with venue, date, contact details, and the event information guests will keep referring back to.</p>
+            </article>
+            <article class="landing-feature-card">
+                <h3>Invitation design</h3>
+                <p>Use templates and visual settings to turn raw event details into a page that feels finished and intentional.</p>
+            </article>
+            <article class="landing-feature-card">
+                <h3>Guest management</h3>
+                <p>Add guests manually or import them in bulk, then keep names, tags, and contact details organized in one place.</p>
+            </article>
+            <article class="landing-feature-card">
+                <h3>Timeline clarity</h3>
+                <p>Structure the day with a readable schedule so the invitation works like a guide, not just an announcement.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="landing-section">
+    <div class="container">
+        <div class="landing-section-heading">
+            <span class="landing-section-kicker">Why it feels better</span>
+            <h2>Guests get a cleaner page. You get a cleaner system.</h2>
+        </div>
+
+        <div class="landing-comparison-grid">
+            <article class="landing-comparison-card landing-comparison-card-muted">
+                <h3>Without a dedicated studio</h3>
+                <ul class="landing-checklist landing-checklist-muted">
+                    <li>Event details drift across chats, notes, and spreadsheets</li>
+                    <li>Guest changes get buried in manual updates</li>
+                    <li>The invitation looks good, but the workflow stays messy</li>
+                </ul>
+            </article>
+            <article class="landing-comparison-card">
+                <h3>With InviteStudio</h3>
+                <ul class="landing-checklist">
+                    <li>One page holds the event story, schedule, and core guest details</li>
+                    <li>Guest imports and edits stay attached to the event itself</li>
+                    <li>The published invitation and the planning workflow stay aligned</li>
+                </ul>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="landing-section landing-section-alt">
+    <div class="container">
+        <div class="landing-process-grid">
+            <div class="landing-process-copy">
+                <span class="landing-section-kicker">How it works</span>
+                <h2>Go from draft to guest-ready in a simple sequence.</h2>
+                <p>
+                    InviteStudio keeps the workflow narrow: create the event, shape the invitation, add guests, then
+                    share a page that feels intentional instead of improvised.
+                </p>
+            </div>
+            <div class="landing-steps">
+                <article class="landing-step">
+                    <span class="landing-step-number">01</span>
+                    <div>
+                        <h3>Create the event</h3>
+                        <p>Start with the essentials: event type, title, date, venue, and the contact details guests need.</p>
+                    </div>
+                </article>
+                <article class="landing-step">
+                    <span class="landing-step-number">02</span>
+                    <div>
+                        <h3>Design the invitation</h3>
+                        <p>Choose a layout, personalize the styling, and add schedule or media details where they strengthen the page.</p>
+                    </div>
+                </article>
+                <article class="landing-step">
+                    <span class="landing-step-number">03</span>
+                    <div>
+                        <h3>Manage and publish</h3>
+                        <p>Import guests, refine changes, and send people to one clean invitation page instead of a long message thread.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="landing-cta">
+    <div class="container">
+        <div class="landing-cta-card">
+            <div>
+                <span class="landing-section-kicker">Ready to start</span>
+                <h2>Set up your first invitation studio.</h2>
+                <p>Create an account, build an event, and replace scattered planning notes with a guest-ready page and a cleaner workflow.</p>
+            </div>
+            <div class="landing-actions">
+                <a class="btn btn-primary btn-lg" asp-page="/Account/Login">Create account</a>
+            </div>
+        </div>
+    </div>
+</section>

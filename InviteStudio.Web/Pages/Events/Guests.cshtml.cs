@@ -35,6 +35,9 @@ namespace InviteStudio.Web.Pages.Events
         [BindProperty(SupportsGet = true)]
         public string SearchTerm { get; set; } = string.Empty;
 
+        [TempData]
+        public string ImportStatusMessage { get; set; } = string.Empty;
+
         public int TotalGuests { get; private set; }
 
         public int TotalPages => PageSize <= 0 ? 1 : Math.Max(1, (int)Math.Ceiling(TotalGuests / (double)PageSize));

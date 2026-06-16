@@ -42,7 +42,7 @@ namespace InviteStudio.Web.Pages.Events
             }
 
             TemplateOptions = BuildTemplateOptions(Event.EventType);
-            TemplatePartialName = SelectTemplate(Event.EventType);
+            TemplatePartialName = SelectTemplate(Event.EventType, Event.TemplateName);
             TemplateAssets = BuildTemplateAssets(TemplateOptions);
             TemplateModel = BuildTemplateModel(Event);
             Input = new DesignCardInputModel
@@ -57,7 +57,12 @@ namespace InviteStudio.Web.Pages.Events
                 VenueMapLink = Event.VenueMapLink,
                 VideoLink = Event.VideoLink,
                 MusicLink = Event.MusicLink,
-                TimelineJson = Event.TimelineJson
+                TimelineJson = Event.TimelineJson,
+                TemplateName = TemplatePartialName,
+                AccentColor = string.IsNullOrWhiteSpace(Event.AccentColor) ? "#1f8cff" : Event.AccentColor,
+                BackgroundColor = string.IsNullOrWhiteSpace(Event.BackgroundColor) ? "#ffffff" : Event.BackgroundColor,
+                FontFamily = string.IsNullOrWhiteSpace(Event.FontFamily) ? "'Segoe UI', sans-serif" : Event.FontFamily,
+                LayoutStyle = string.IsNullOrWhiteSpace(Event.LayoutStyle) ? "center" : Event.LayoutStyle
             };
 
             return Page();
@@ -107,6 +112,11 @@ namespace InviteStudio.Web.Pages.Events
             @event.VideoLink = Input.VideoLink?.Trim() ?? string.Empty;
             @event.MusicLink = Input.MusicLink?.Trim() ?? string.Empty;
             @event.TimelineJson = Input.TimelineJson?.Trim() ?? string.Empty;
+            @event.TemplateName = SelectTemplate(@event.EventType, Input.TemplateName);
+            @event.AccentColor = Input.AccentColor?.Trim() ?? "#1f8cff";
+            @event.BackgroundColor = Input.BackgroundColor?.Trim() ?? "#ffffff";
+            @event.FontFamily = Input.FontFamily?.Trim() ?? "'Segoe UI', sans-serif";
+            @event.LayoutStyle = Input.LayoutStyle?.Trim() ?? "center";
 
             await _dbContext.SaveChangesAsync();
 
@@ -210,7 +220,7 @@ namespace InviteStudio.Web.Pages.Events
             return assets.ToList();
         }
 
-        private static InvitationTemplateModel BuildTemplateModel(Event @event)
+        internal static InvitationTemplateModel BuildTemplateModel(Event @event)
         {
             var timeline = TimelineSchedule.FromJson(@event.TimelineJson);
             return new InvitationTemplateModel
@@ -232,9 +242,10 @@ namespace InviteStudio.Web.Pages.Events
                 MusicEmbedLinkMuted = BuildMusicEmbedLink(@event.MusicLink, true),
                 MusicEmbedLink = BuildMusicEmbedLink(@event.MusicLink, false),
                 MusicEmbedType = GetMusicEmbedType(@event.MusicLink),
-                AccentColor = "#1f8cff",
-                BackgroundColor = "#ffffff",
-                FontFamily = "'Segoe UI', sans-serif",
+                AccentColor = string.IsNullOrWhiteSpace(@event.AccentColor) ? "#1f8cff" : @event.AccentColor,
+                BackgroundColor = string.IsNullOrWhiteSpace(@event.BackgroundColor) ? "#ffffff" : @event.BackgroundColor,
+                FontFamily = string.IsNullOrWhiteSpace(@event.FontFamily) ? "'Segoe UI', sans-serif" : @event.FontFamily,
+                LayoutStyle = string.IsNullOrWhiteSpace(@event.LayoutStyle) ? "center" : @event.LayoutStyle,
                 FooterLeft = string.Empty,
                 FooterRight = string.Empty,
                 Timeline = timeline
@@ -350,6 +361,7 @@ namespace InviteStudio.Web.Pages.Events
         public string AccentColor { get; set; } = "#1f8cff";
         public string BackgroundColor { get; set; } = "#ffffff";
         public string FontFamily { get; set; } = "'Segoe UI', sans-serif";
+        public string LayoutStyle { get; set; } = "center";
         public string FooterLeft { get; set; } = string.Empty;
         public string FooterRight { get; set; } = string.Empty;
         public string Person1Phone { get; set; } = string.Empty;
@@ -420,5 +432,10 @@ namespace InviteStudio.Web.Pages.Events
         public string VideoLink { get; set; } = string.Empty;
         public string MusicLink { get; set; } = string.Empty;
         public string TimelineJson { get; set; } = string.Empty;
+        public string TemplateName { get; set; } = string.Empty;
+        public string AccentColor { get; set; } = "#1f8cff";
+        public string BackgroundColor { get; set; } = "#ffffff";
+        public string FontFamily { get; set; } = "'Segoe UI', sans-serif";
+        public string LayoutStyle { get; set; } = "center";
     }
 }

@@ -7,6 +7,11 @@ namespace InviteStudio.Application.Entities;
 
 public class Event : BaseEntity
 {
+    public string TemplateName { get; set; } = string.Empty;
+    public string AccentColor { get; set; } = "#1f8cff";
+    public string BackgroundColor { get; set; } = "#ffffff";
+    public string FontFamily { get; set; } = "'Segoe UI', sans-serif";
+    public string LayoutStyle { get; set; } = "center";
     public EventType EventType { get; set; }
     public string Person1Name { get; set; } = string.Empty;
     public string Person2Name { get; set; } = string.Empty;

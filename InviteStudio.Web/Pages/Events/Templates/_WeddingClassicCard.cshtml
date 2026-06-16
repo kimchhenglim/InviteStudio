@@ -8,7 +8,7 @@
     </div>
     <div class="event-preview-divider"></div>
     <p class="event-preview-message" id="previewMessage">@Model.Message</p>
-    <div class="event-preview-meta" id="previewMeta">
+    <div class="event-preview-meta" id="previewMeta" style="justify-content: @(Model.LayoutStyle == "split" ? "space-between" : "center");">
         <div>
             <span class="event-preview-label">Date</span>
             <span id="previewDate">@Model.DateText</span>

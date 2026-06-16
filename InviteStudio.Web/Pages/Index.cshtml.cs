@@ -7,7 +7,12 @@ namespace InviteStudio.Web.Pages
     {
         public IActionResult OnGet()
         {
-            return RedirectToPage("/Account/Login");
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToPage("/Home/Home");
+            }
+
+            return Page();
         }
     }
 }

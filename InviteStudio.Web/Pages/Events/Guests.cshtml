@@ -19,6 +19,7 @@
             </div>
             <div class="event-detail-actions">
                 <a class="btn btn-primary" asp-page="/Events/AddGuest" asp-route-id="@Model.Event?.Id">Create guest</a>
+                <a class="btn btn-primary" asp-page="/Events/ImportGuests" asp-route-id="@Model.Event?.Id">Import guests</a>
                 <a class="btn btn-outline-primary btn-action-shape" asp-page="/Home/Home">Back to home</a>
             </div>
         </div>
@@ -29,10 +30,15 @@
     <div class="row g-4">
         <div class="col-12">
             <section class="event-detail-card">
+                @if (!string.IsNullOrWhiteSpace(Model.ImportStatusMessage))
+                {
+                    <div class="alert alert-success mb-0">@Model.ImportStatusMessage</div>
+                }
                 <div class="event-detail-toolbar">
-                    <form class="event-detail-search" method="get">
+                    <form class="event-detail-search" id="guestSearchForm" method="get">
                         <input type="hidden" name="id" value="@Model.Event?.Id" />
                         <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                        <input type="hidden" name="pageNumber" value="1" />
                         <label class="visually-hidden" for="guestSearch">Search guests</label>
                         <input class="form-control" id="guestSearch" name="searchTerm" type="search" value="@Model.SearchTerm" placeholder="Search by name, phone number, or tag" />
                         <button class="btn btn-outline-primary btn-action-shape" type="submit">Search</button>
@@ -42,96 +48,98 @@
                         }
                     </form>
                 </div>
-                <form method="post">
-                    <div class="event-detail-section">
-                        <div>
-                            <span class="event-detail-label">Guest list</span>
-                            <h2>Invitees</h2>
-                        </div>
-                        <div class="d-flex flex-wrap align-items-center gap-2">
-                            <span class="event-detail-chip">@Model.TotalGuests guests</span>
-                            <label class="form-label m-0" for="pageSize">Show</label>
-                            <select class="form-select form-select-sm w-auto" id="pageSize" name="pageSize" onchange="this.form.submit()">
-                                @foreach (var size in new[] { 20, 50, 100, 200 })
-                                {
-                                    <option value="@size" selected="@(Model.PageSize == size)">@size</option>
-                                }
-                            </select>
-                            <input type="hidden" name="pageNumber" value="@Model.PageNumber" />
-                            <input type="hidden" name="searchTerm" value="@Model.SearchTerm" />
-                            <button class="btn btn-outline-danger btn-sm" type="submit" asp-page-handler="BulkDelete">Delete selected</button>
-                        </div>
-                    </div>
-                    @if (Model.Guests.Count == 0)
-                    {
-                        <div class="alert alert-light">
-                            @(string.IsNullOrWhiteSpace(Model.SearchTerm)
-                                ? "No guests added yet. Create your first guest to start tracking invites."
-                                : "No guests match that search.")
-                        </div>
-                    }
-                    else
-                    {
-                        <ul class="event-detail-list">
-                            <li class="event-detail-list-borderless">
-                                <div class="d-flex align-items-center gap-3">
-                                    <input class="form-check-input" type="checkbox" id="selectAllGuests" />
-                                    <label class="event-detail-subtext" for="selectAllGuests">Select all</label>
-                                </div>
-                            </li>
-                            @foreach (var guest in Model.Guests)
-                            {
-                                <li>
-                                    <div class="d-flex align-items-start gap-3">
-                                        <input class="form-check-input guest-selection" type="checkbox" name="SelectedGuestIds" value="@guest.Id" />
-                                        <div>
-                                            <div class="event-detail-value">@guest.Name</div>
-                                            <div class="event-detail-subtext">@guest.PhoneNumber</div>
-                                            <span class="event-detail-badge">@guest.Tag</span>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex gap-2">
-                                        <a class="btn btn-outline-primary btn-sm btn-icon" asp-page="/Events/EditGuest" asp-route-id="@Model.Event?.Id" asp-route-guestId="@guest.Id" asp-route-pageNumber="@Model.PageNumber" asp-route-pageSize="@Model.PageSize" asp-route-searchTerm="@Model.SearchTerm" aria-label="Edit guest">
-                                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
-                                                <path d="M4 20h4l10.5-10.5a1.414 1.414 0 0 0 0-2L15.5 4.5a1.414 1.414 0 0 0-2 0L3 15v4a1 1 0 0 0 1 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
-                                                <path d="M13.5 6.5l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                            </svg>
-                                        </a>
-                                        <button class="btn btn-outline-danger btn-sm btn-icon" type="submit" asp-page-handler="Delete" asp-route-id="@Model.Event?.Id" asp-route-guestId="@guest.Id" asp-route-pageNumber="@Model.PageNumber" asp-route-pageSize="@Model.PageSize" asp-route-searchTerm="@Model.SearchTerm" aria-label="Delete guest">
-                                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
-                                                <path d="M4 7h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                                <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                                <path d="M7 7l1 12a1 1 0 0 0 1 .9h6a1 1 0 0 0 1-.9l1-12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                                <path d="M10 11v5M14 11v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </li>
-                            }
-                        </ul>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="event-detail-subtext">Page @Model.PageNumber of @Model.TotalPages</span>
-                            <div class="d-flex gap-2">
-                                @if (Model.PageNumber <= 1)
-                                {
-                                    <span class="btn btn-outline-primary btn-sm btn-action-shape disabled" aria-disabled="true">Previous</span>
-                                }
-                                else
-                                {
-                                    <a class="btn btn-outline-primary btn-sm btn-action-shape" asp-page="/Events/Guests" asp-route-id="@Model.Event?.Id" asp-route-pageNumber="@Math.Max(1, Model.PageNumber - 1)" asp-route-pageSize="@Model.PageSize" asp-route-searchTerm="@Model.SearchTerm">Previous</a>
-                                }
-                                @if (Model.PageNumber >= Model.TotalPages)
-                                {
-                                    <span class="btn btn-outline-primary btn-sm btn-action-shape disabled" aria-disabled="true">Next</span>
-                                }
-                                else
-                                {
-                                    <a class="btn btn-outline-primary btn-sm btn-action-shape" asp-page="/Events/Guests" asp-route-id="@Model.Event?.Id" asp-route-pageNumber="@Math.Min(Model.TotalPages, Model.PageNumber + 1)" asp-route-pageSize="@Model.PageSize" asp-route-searchTerm="@Model.SearchTerm">Next</a>
-                                }
+                <div id="guestResults">
+                    <form method="post">
+                        <div class="event-detail-section">
+                            <div>
+                                <span class="event-detail-label">Guest list</span>
+                                <h2>Invitees</h2>
+                            </div>
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                <span class="event-detail-chip">@Model.TotalGuests guests</span>
+                                <label class="form-label m-0" for="pageSize">Show</label>
+                                <select class="form-select form-select-sm w-auto" id="pageSize" name="pageSize" onchange="this.form.submit()">
+                                    @foreach (var size in new[] { 20, 50, 100, 200 })
+                                    {
+                                        <option value="@size" selected="@(Model.PageSize == size)">@size</option>
+                                    }
+                                </select>
+                                <input type="hidden" name="pageNumber" value="@Model.PageNumber" />
+                                <input type="hidden" name="searchTerm" value="@Model.SearchTerm" />
+                                <button class="btn btn-outline-danger btn-sm" type="submit" asp-page-handler="BulkDelete">Delete selected</button>
                             </div>
                         </div>
-                    }
-                </form>
+                        @if (Model.Guests.Count == 0)
+                        {
+                            <div class="alert alert-light">
+                                @(string.IsNullOrWhiteSpace(Model.SearchTerm)
+                                    ? "No guests added yet. Create your first guest to start tracking invites."
+                                    : "No guests match that search.")
+                            </div>
+                        }
+                        else
+                        {
+                            <ul class="event-detail-list">
+                                <li class="event-detail-list-borderless">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <input class="form-check-input" type="checkbox" id="selectAllGuests" />
+                                        <label class="event-detail-subtext" for="selectAllGuests">Select all</label>
+                                    </div>
+                                </li>
+                                @foreach (var guest in Model.Guests)
+                                {
+                                    <li>
+                                        <div class="d-flex align-items-start gap-3">
+                                            <input class="form-check-input guest-selection" type="checkbox" name="SelectedGuestIds" value="@guest.Id" />
+                                            <div>
+                                                <div class="event-detail-value">@guest.Name</div>
+                                                <div class="event-detail-subtext">@guest.PhoneNumber</div>
+                                                <span class="event-detail-badge">@guest.Tag</span>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <a class="btn btn-outline-primary btn-sm btn-icon" asp-page="/Events/EditGuest" asp-route-id="@Model.Event?.Id" asp-route-guestId="@guest.Id" asp-route-pageNumber="@Model.PageNumber" asp-route-pageSize="@Model.PageSize" asp-route-searchTerm="@Model.SearchTerm" aria-label="Edit guest">
+                                                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+                                                    <path d="M4 20h4l10.5-10.5a1.414 1.414 0 0 0 0-2L15.5 4.5a1.414 1.414 0 0 0-2 0L3 15v4a1 1 0 0 0 1 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+                                                    <path d="M13.5 6.5l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                                </svg>
+                                            </a>
+                                            <button class="btn btn-outline-danger btn-sm btn-icon" type="submit" asp-page-handler="Delete" asp-route-id="@Model.Event?.Id" asp-route-guestId="@guest.Id" asp-route-pageNumber="@Model.PageNumber" asp-route-pageSize="@Model.PageSize" asp-route-searchTerm="@Model.SearchTerm" aria-label="Delete guest">
+                                                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+                                                    <path d="M4 7h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                                    <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                                    <path d="M7 7l1 12a1 1 0 0 0 1 .9h6a1 1 0 0 0 1-.9l1-12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                                    <path d="M10 11v5M14 11v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="event-detail-subtext">Page @Model.PageNumber of @Model.TotalPages</span>
+                                <div class="d-flex gap-2">
+                                    @if (Model.PageNumber <= 1)
+                                    {
+                                        <span class="btn btn-outline-primary btn-sm btn-action-shape disabled" aria-disabled="true">Previous</span>
+                                    }
+                                    else
+                                    {
+                                        <a class="btn btn-outline-primary btn-sm btn-action-shape" asp-page="/Events/Guests" asp-route-id="@Model.Event?.Id" asp-route-pageNumber="@Math.Max(1, Model.PageNumber - 1)" asp-route-pageSize="@Model.PageSize" asp-route-searchTerm="@Model.SearchTerm">Previous</a>
+                                    }
+                                    @if (Model.PageNumber >= Model.TotalPages)
+                                    {
+                                        <span class="btn btn-outline-primary btn-sm btn-action-shape disabled" aria-disabled="true">Next</span>
+                                    }
+                                    else
+                                    {
+                                        <a class="btn btn-outline-primary btn-sm btn-action-shape" asp-page="/Events/Guests" asp-route-id="@Model.Event?.Id" asp-route-pageNumber="@Math.Min(Model.TotalPages, Model.PageNumber + 1)" asp-route-pageSize="@Model.PageSize" asp-route-searchTerm="@Model.SearchTerm">Next</a>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </form>
+                </div>
             </section>
         </div>
     </div>
@@ -140,29 +148,90 @@
 @section Scripts {
     <script>
         (() => {
-            const selectAll = document.getElementById("selectAllGuests");
-            if (!selectAll) {
-                return;
-            }
+            const resultsContainer = document.getElementById("guestResults");
+            const searchForm = document.getElementById("guestSearchForm");
+            const searchInput = document.getElementById("guestSearch");
+            let searchTimer;
 
-            const selections = Array.from(document.querySelectorAll(".guest-selection"));
-            const syncState = () => {
-                const total = selections.length;
-                const checked = selections.filter(input => input.checked).length;
-                selectAll.checked = total > 0 && checked === total;
-                selectAll.indeterminate = checked > 0 && checked < total;
+            const bindSelectionControls = () => {
+                const selectAll = document.getElementById("selectAllGuests");
+                if (!selectAll) {
+                    return;
+                }
+
+                const selections = Array.from(document.querySelectorAll(".guest-selection"));
+                const syncState = () => {
+                    const total = selections.length;
+                    const checked = selections.filter(input => input.checked).length;
+                    selectAll.checked = total > 0 && checked === total;
+                    selectAll.indeterminate = checked > 0 && checked < total;
+                };
+
+                selectAll.addEventListener("change", () => {
+                    selections.forEach(input => { input.checked = selectAll.checked; });
+                    syncState();
+                });
+
+                selections.forEach(input => {
+                    input.addEventListener("change", syncState);
+                });
+
+                syncState();
             };
 
-            selectAll.addEventListener("change", () => {
-                selections.forEach(input => { input.checked = selectAll.checked; });
-                syncState();
-            });
+            const refreshGuestResults = async (url) => {
+                if (!resultsContainer) {
+                    window.location.href = url;
+                    return;
+                }
 
-            selections.forEach(input => {
-                input.addEventListener("change", syncState);
-            });
+                const response = await fetch(url, {
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
 
-            syncState();
+                if (!response.ok) {
+                    window.location.href = url;
+                    return;
+                }
+
+                const html = await response.text();
+                const parsed = new DOMParser().parseFromString(html, "text/html");
+                const nextResults = parsed.getElementById("guestResults");
+                if (!nextResults) {
+                    window.location.href = url;
+                    return;
+                }
+
+                resultsContainer.innerHTML = nextResults.innerHTML;
+                window.history.replaceState({}, "", url);
+                bindSelectionControls();
+            };
+
+            if (searchForm && searchInput) {
+                searchForm.addEventListener("submit", (event) => {
+                    event.preventDefault();
+                    const query = new URLSearchParams(new FormData(searchForm));
+                    refreshGuestResults(`${window.location.pathname}?${query.toString()}`);
+                });
+
+                searchInput.addEventListener("input", () => {
+                    window.clearTimeout(searchTimer);
+                    searchTimer = window.setTimeout(() => {
+                        searchForm.requestSubmit();
+                    }, 250);
+                });
+
+                searchForm.querySelectorAll("a[href]").forEach((link) => {
+                    link.addEventListener("click", (event) => {
+                        event.preventDefault();
+                        refreshGuestResults(link.href);
+                    });
+                });
+            }
+
+            bindSelectionControls();
         })();
     </script>
 }

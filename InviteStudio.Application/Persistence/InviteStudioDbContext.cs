@@ -29,6 +29,11 @@ public class InviteStudioDbContext : DbContext
         modelBuilder.Entity<Event>(entity =>
         {
             entity.HasKey(@event => @event.Id);
+            entity.Property(@event => @event.TemplateName).HasMaxLength(100);
+            entity.Property(@event => @event.AccentColor).HasMaxLength(32).IsRequired();
+            entity.Property(@event => @event.BackgroundColor).HasMaxLength(32).IsRequired();
+            entity.Property(@event => @event.FontFamily).HasMaxLength(120).IsRequired();
+            entity.Property(@event => @event.LayoutStyle).HasMaxLength(40).IsRequired();
             entity.Property(@event => @event.EventType).HasConversion<string>().HasMaxLength(100).IsRequired();
             entity.Property(@event => @event.Person1Name).HasMaxLength(200).IsRequired();
             entity.Property(@event => @event.Person2Name).HasMaxLength(200).IsRequired();

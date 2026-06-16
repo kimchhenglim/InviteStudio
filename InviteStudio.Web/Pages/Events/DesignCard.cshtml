@@ -49,6 +49,8 @@
 <form method="post" id="designForm">
     <input type="hidden" asp-for="Input.EventId" />
     <input type="hidden" asp-for="Input.TimelineJson" id="timelineJson" />
+    <input type="hidden" asp-for="Input.AccentColor" id="accentColor" />
+    <input type="hidden" asp-for="Input.BackgroundColor" id="backgroundColor" />
     <div class="container pb-5">
         <div class="row g-4">
         <div class="col-12 col-lg-7">
@@ -152,10 +154,10 @@
                 <div class="event-design-grid">
                     <div>
                         <label class="form-label" for="templateSelect">Template</label>
-                        <select class="form-select" id="templateSelect">
+                        <select class="form-select" id="templateSelect" asp-for="Input.TemplateName">
                             @foreach (var option in Model.TemplateOptions)
                             {
-                                <option value="@option.Value" selected="@(option.Value == selectedTemplate)">@option.Label</option>
+                                <option value="@option.Value">@option.Label</option>
                             }
                         </select>
                     </div>
@@ -181,16 +183,16 @@
                     </div>
                     <div>
                         <label class="form-label" for="fontStyle">Font style</label>
-                        <select class="form-select" id="fontStyle">
-                            <option value="'Segoe UI', sans-serif" selected>Modern sans</option>
+                        <select class="form-select" id="fontStyle" asp-for="Input.FontFamily">
+                            <option value="'Segoe UI', sans-serif">Modern sans</option>
                             <option value="'Playfair Display', serif">Classic serif</option>
                             <option value="'Caveat', cursive">Handwritten</option>
                         </select>
                     </div>
                     <div>
                         <label class="form-label" for="layoutStyle">Layout</label>
-                        <select class="form-select" id="layoutStyle">
-                            <option value="center" selected>Centered</option>
+                        <select class="form-select" id="layoutStyle" asp-for="Input.LayoutStyle">
+                            <option value="center">Centered</option>
                             <option value="split">Split header</option>
                         </select>
                     </div>
@@ -244,6 +246,8 @@
             const musicLinkInput = document.getElementById("cardMusicLink");
             const templateInput = document.getElementById("templateSelect");
             const paletteSwatches = document.getElementById("paletteSwatches");
+            const accentColorInput = document.getElementById("accentColor");
+            const backgroundColorInput = document.getElementById("backgroundColor");
             const accentState = { value: "@previewModel.AccentColor" };
             const backgroundState = { value: "@previewModel.BackgroundColor" };
             const fontInput = document.getElementById("fontStyle");
@@ -737,10 +741,16 @@
 
                 if (accent) {
                     accentState.value = accent;
+                    if (accentColorInput) {
+                        accentColorInput.value = accent;
+                    }
                 }
 
                 if (background) {
                     backgroundState.value = background;
+                    if (backgroundColorInput) {
+                        backgroundColorInput.value = background;
+                    }
                 }
 
                 paletteSwatches?.querySelectorAll(".event-palette-swatch").forEach((button) => {
@@ -1094,6 +1104,18 @@
             document.addEventListener("pointercancel", endPointerDrag);
 
             updatePersonFields();
+            if (accentColorInput && !accentColorInput.value) {
+                accentColorInput.value = accentState.value;
+            }
+            if (backgroundColorInput && !backgroundColorInput.value) {
+                backgroundColorInput.value = backgroundState.value;
+            }
+            const initialSwatch = paletteSwatches?.querySelector(
+                `.event-palette-swatch[data-accent="${accentState.value}"][data-background="${backgroundState.value}"]`
+            );
+            if (initialSwatch instanceof HTMLElement) {
+                applyPalette(initialSwatch);
+            }
             updatePreview();
             updateAudioControls();
             updateMapLink(locationLink?.value ?? "");
